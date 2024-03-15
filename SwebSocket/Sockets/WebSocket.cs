@@ -223,7 +223,7 @@ public class WebSocket : Socket<Message>, IDisposable
         client.Connect(uri.Host, uri.Port);
         return new WebSocket(
             client,
-            new ClientHandshake(uri.Host, (ushort)uri.Port),
+            new ClientHandshake(uri.Host, (ushort)uri.Port, uri.AbsolutePath),
             MaskingBehavior.MaskOutgoing
         );
     }

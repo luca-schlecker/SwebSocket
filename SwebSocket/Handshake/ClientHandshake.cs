@@ -7,11 +7,13 @@ internal class ClientHandshake : Handshake
 {
     private string host;
     private ushort port;
+    private string path;
 
-    public ClientHandshake(string host, ushort port)
+    public ClientHandshake(string host, ushort port, string path)
     {
         this.host = host;
         this.port = port;
+        this.path = path;
     }
 
     public override async Task StartHandshake(TcpClient client, CancellationToken token = default)
@@ -19,7 +21,7 @@ internal class ClientHandshake : Handshake
         var key = SecWebSocketKey.Random();
         var stream = client.GetStream();
 
-        var upgradeRequest = UpgradeRequest(key, $"{host}:{port}", "/");
+        var upgradeRequest = UpgradeRequest(key, $"{host}:{port}", path);
         await stream.WriteAsync(upgradeRequest, token);
         var request = await stream.ReadUntilAsync("\r\n\r\n", token);
         var httpResponse = HttpParser.Parse(request);
