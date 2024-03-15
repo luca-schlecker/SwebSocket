@@ -216,6 +216,9 @@ public class WebSocket : Socket<Message>, IDisposable
 
     public static WebSocket Connect(Uri uri)
     {
+        if (uri.Scheme != "ws" && uri.Scheme != "wss")
+            throw new ArgumentException("Invalid URI Scheme");
+
         var client = new TcpClient();
         client.Connect(uri.Host, uri.Port);
         return new WebSocket(
