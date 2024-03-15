@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwebSocat", "SwebSocat\SwebSocat.csproj", "{EB7E4C94-5A43-46B1-99EB-D8BE602BB70A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwebSocket", "SwebSocket\SwebSocket.csproj", "{3BE63113-33F6-4EE4-81DA-159DC29F16EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB7E4C94-5A43-46B1-99EB-D8BE602BB70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB7E4C94-5A43-46B1-99EB-D8BE602BB70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB7E4C94-5A43-46B1-99EB-D8BE602BB70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB7E4C94-5A43-46B1-99EB-D8BE602BB70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BE63113-33F6-4EE4-81DA-159DC29F16EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BE63113-33F6-4EE4-81DA-159DC29F16EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BE63113-33F6-4EE4-81DA-159DC29F16EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BE63113-33F6-4EE4-81DA-159DC29F16EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
