@@ -228,17 +228,17 @@ public class WebSocket : Socket<Message>, IDisposable
         );
     }
 
-    public static WebSocket Connect(IPEndPoint remote)
-        => Connect(remote.Address, (ushort)remote.Port);
+    // public static WebSocket Connect(IPEndPoint remote, string path = "/")
+    //     => Connect(remote.Address, (ushort)remote.Port, path);
 
-    public static WebSocket Connect(IPAddress address, ushort port)
-    {
-        var client = new TcpClient();
-        client.Connect(address, port);
-        return new WebSocket(
-            client,
-            new ClientHandshake(address.ToString(), port),
-            MaskingBehavior.MaskOutgoing
-        );
-    }
+    // public static WebSocket Connect(IPAddress address, ushort port, string path = "/")
+    // {
+    //     var client = new TcpClient();
+    //     client.Connect(address, port);
+    //     return new WebSocket(
+    //         client,
+    //         new ClientHandshake(address.ToString(), port, path),
+    //         MaskingBehavior.MaskOutgoing
+    //     );
+    // }
 }
