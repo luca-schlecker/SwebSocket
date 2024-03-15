@@ -5,7 +5,7 @@ namespace SwebSocket;
 
 public static class Extensions
 {
-    internal static async Task<byte[]> ReadUntilAsync(this NetworkStream s, string delimiter, CancellationToken token = default)
+    internal static async Task<byte[]> ReadUntilAsync(this Stream s, string delimiter, CancellationToken token = default)
     {
         var delimiterBytes = Encoding.ASCII.GetBytes(delimiter);
         var buffer = new byte[1024];

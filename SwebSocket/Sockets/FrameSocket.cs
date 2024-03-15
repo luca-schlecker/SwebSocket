@@ -1,20 +1,18 @@
-using System.Net.Sockets;
-
 namespace SwebSocket;
 
 internal class FrameSocket : Socket<Frame>, IDisposable
 {
-    private TcpClient client;
+    private Stream stream;
     private CancellationTokenSource cts = new();
     private Task poller;
     private SemaphoreSlim sendLock = new(1);
     private readonly MaskingBehavior masking;
 
-    public FrameSocket(TcpClient client, MaskingBehavior masking)
+    public FrameSocket(Stream stream, MaskingBehavior masking)
     {
-        this.client = client;
+        this.stream = stream;
         this.masking = masking;
-        Status = client.Connected ? SocketStatus.Connected : SocketStatus.Closed;
+        Status = SocketStatus.Connected;
         poller = Status == SocketStatus.Connected
             ? Task.Run(() => StartPolling(cts.Token), cts.Token)
             : Task.CompletedTask;
@@ -27,7 +25,7 @@ internal class FrameSocket : Socket<Frame>, IDisposable
             cts.Cancel();
             poller.Wait();
             sendLock.Wait();
-            client.Close();
+            stream.Close();
             sendLock.Release();
             Status = SocketStatus.Closed;
             EmitClosed();
@@ -41,7 +39,7 @@ internal class FrameSocket : Socket<Frame>, IDisposable
             await cts.CancelAsync();
             await poller;
             await sendLock.WaitAsync();
-            client.Close();
+            stream.Close();
             sendLock.Release();
             Status = SocketStatus.Closed;
             EmitClosed();
@@ -66,7 +64,6 @@ internal class FrameSocket : Socket<Frame>, IDisposable
 
         try
         {
-            var stream = client.GetStream();
             var frameStream = new FrameStream(stream);
             foreach (var frame in frames)
             {
@@ -93,7 +90,6 @@ internal class FrameSocket : Socket<Frame>, IDisposable
 
         try
         {
-            var stream = client.GetStream();
             var frameStream = new FrameStream(stream);
             foreach (var frame in frames)
             {
@@ -109,7 +105,6 @@ internal class FrameSocket : Socket<Frame>, IDisposable
     {
         try
         {
-            var stream = client.GetStream();
             var frameStream = new FrameStream(stream);
 
             while (!token.IsCancellationRequested)

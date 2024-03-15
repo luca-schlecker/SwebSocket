@@ -16,10 +16,9 @@ internal class ClientHandshake : Handshake
         this.path = path;
     }
 
-    public override async Task StartHandshake(TcpClient client, CancellationToken token = default)
+    public override async Task StartHandshake(Stream stream, CancellationToken token = default)
     {
         var key = SecWebSocketKey.Random();
-        var stream = client.GetStream();
 
         var upgradeRequest = UpgradeRequest(key, $"{host}:{port}", path);
         await stream.WriteAsync(upgradeRequest, token);

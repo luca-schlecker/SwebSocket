@@ -1,4 +1,3 @@
-using System.Net.Sockets;
 using System.Text;
 
 namespace SwebSocket;
@@ -7,14 +6,13 @@ internal class ServerHandshake : Handshake
 {
     public ServerHandshake() { }
 
-    public override async Task StartHandshake(TcpClient client, CancellationToken token = default)
+    public override async Task StartHandshake(Stream stream, CancellationToken token = default)
     {
-        var stream = client.GetStream();
         var requestText = await stream.ReadUntilAsync("\r\n\r\n", token);
         var request = HttpParser.Parse(requestText);
 
-        string? secWebSocketKeyString = null;
-        SecWebSocketKey? secWebSocketKey = null;
+        string? secWebSocketKeyString;
+        SecWebSocketKey? secWebSocketKey;
 
         if (
             request.MajorVersion != 1 || request.MinorVersion != 1

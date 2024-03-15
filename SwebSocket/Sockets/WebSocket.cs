@@ -1,5 +1,3 @@
-
-using System.Net;
 using System.Net.Sockets;
 
 namespace SwebSocket;
@@ -10,23 +8,25 @@ public class WebSocket : Socket<Message>, IDisposable
     private MessageBuilder messageBuilder = new();
     private IMessageSplitter messageSplitter;
     private CancellationTokenSource cancelHandshake = new();
+    private TcpClient client;
 
     internal WebSocket(TcpClient client, Handshake handshake, MaskingBehavior masking)
     {
+        this.client = client;
         Status = SocketStatus.Connecting;
         messageSplitter = new DefaultMessageSplitter();
-        Task.Run(() => InitiateHandshake(client, handshake, masking));
+        Task.Run(() => InitiateHandshake(client.GetStream(), handshake, masking));
     }
 
-    private async void InitiateHandshake(TcpClient client, Handshake handshake, MaskingBehavior masking)
+    private async void InitiateHandshake(Stream stream, Handshake handshake, MaskingBehavior masking)
     {
         try
         {
-            await handshake.StartHandshake(client, cancelHandshake.Token);
+            await handshake.StartHandshake(stream, cancelHandshake.Token);
             var status = StartTestThenSetStatus();
             if (Status == SocketStatus.Connecting)
             {
-                frameSocket = new FrameSocket(client, masking);
+                frameSocket = new FrameSocket(stream, masking);
                 frameSocket.OnMessage += FrameReceived;
                 frameSocket.OnClosed += HandleBrokenPipe;
                 EndTestThenSetStatus(SocketStatus.Connected);
@@ -202,6 +202,7 @@ public class WebSocket : Socket<Message>, IDisposable
             {
                 Close();
                 frameSocket?.Dispose();
+                client.Dispose();
             }
 
             disposedValue = true;
