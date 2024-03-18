@@ -1,5 +1,6 @@
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SwebSocket;
 
@@ -216,55 +217,48 @@ public class WebSocket : Socket<Message>, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public static WebSocket Connect(Uri uri) => Connect(
-        uri,
-        new WebSocketConnectionOptions()
-        {
-            SSL = new SSLConnectionOptions()
-            {
-                UseSSL = uri.Scheme == "wss",
-                ValidatedAuthority = uri.Host
-            }
-        }
-    );
-
-    public static WebSocket Connect(Uri uri, WebSocketConnectionOptions options)
+    internal WebSocket(ConnectionOptions options)
     {
-        if (uri.Scheme != "ws" && uri.Scheme != "wss")
-            throw new ArgumentException("Invalid URI Scheme");
-
         var client = new TcpClient();
-        client.Connect(uri.Host, uri.Port);
-        return new WebSocket(
-            client,
-            GetStream(client, options.SSL),
-            new ClientHandshake(uri.Host, (ushort)uri.Port, uri.AbsolutePath),
-            MaskingBehavior.MaskOutgoing
+        client.Connect(options.Host!, options.Port!.Value);
+
+        var stream = GetStream(client, options);
+        var handshake = new ClientHandshake(
+            options.Host!,
+            options.Port.Value,
+            options.Path!
         );
+        var masking = MaskingBehavior.MaskOutgoing;
+
+        this.client = client;
+        Status = SocketStatus.Connecting;
+        messageSplitter = new DefaultMessageSplitter();
+        Task.Run(() => InitiateHandshake(stream, handshake, masking));
     }
 
-    private static Stream GetStream(TcpClient client, SSLConnectionOptions options)
+    private Stream GetStream(TcpClient client, ConnectionOptions options)
     {
         if (options.UseSSL)
         {
             var sslStream = new SslStream(client.GetStream(), false);
-            sslStream.AuthenticateAsClient(options.ValidatedAuthority);
+            var authOptions = new SslClientAuthenticationOptions();
+
+            if (options.ValidatedAuthority is not null)
+                authOptions.TargetHost = options.ValidatedAuthority;
+
+            if (options.CaCertificate is not null)
+            {
+                authOptions.CertificateChainPolicy = new X509ChainPolicy
+                {
+                    RevocationMode = X509RevocationMode.NoCheck,
+                    TrustMode = X509ChainTrustMode.CustomRootTrust
+                };
+                authOptions.CertificateChainPolicy.CustomTrustStore.Add(options.CaCertificate);
+            }
+
+            sslStream.AuthenticateAsClient(authOptions);
             return sslStream;
         }
-        return client.GetStream();
+        else return client.GetStream();
     }
-
-    // public static WebSocket Connect(IPEndPoint remote, string path = "/")
-    //     => Connect(remote.Address, (ushort)remote.Port, path);
-
-    // public static WebSocket Connect(IPAddress address, ushort port, string path = "/")
-    // {
-    //     var client = new TcpClient();
-    //     client.Connect(address, port);
-    //     return new WebSocket(
-    //         client,
-    //         new ClientHandshake(address.ToString(), port, path),
-    //         MaskingBehavior.MaskOutgoing
-    //     );
-    // }
 }

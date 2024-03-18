@@ -1,12 +1,13 @@
+using System.Security.Cryptography.X509Certificates;
+
 namespace SwebSocket;
 
-public class WebSocketConnectionOptions
+internal class ConnectionOptions
 {
-    public SSLConnectionOptions SSL { get; set; }
-}
-
-public class SSLConnectionOptions
-{
-    public bool UseSSL { get; set; }
-    public string ValidatedAuthority { get; set; }
+    public string? Host { get; set; }
+    public ushort? Port { get; set; }
+    public string? Path { get; set; }
+    public bool UseSSL { get; set; } = false;
+    public string? ValidatedAuthority { get; set; }
+    public X509Certificate2? CaCertificate { get; set; }
 }

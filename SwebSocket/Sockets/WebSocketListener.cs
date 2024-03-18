@@ -6,26 +6,20 @@ namespace SwebSocket;
 
 public class WebSocketListener : IDisposable
 {
-    public IPAddress Address { get; }
-    public ushort Port { get; }
-    public ServerSSLOptions SSLOptions { get; set; }
+    public IPAddress Address => options.Address!;
+    public ushort Port => options.Port!.Value;
+    public bool UseSsl => options.UseSsl;
+
+    private ListenerOptions options { get; }
 
     private TcpListener listener;
 
-    public WebSocketListener(IPAddress address, ushort port)
-        : this(address, port, ServerSSLOptions.NoSSL()) { }
-    public WebSocketListener(IPAddress address, ushort port, ServerSSLOptions sSLOptions)
+    internal WebSocketListener(ListenerOptions options)
     {
-        Address = address;
-        Port = port;
-        SSLOptions = sSLOptions;
-        listener = new TcpListener(address, port);
+        this.options = options;
+        listener = new TcpListener(options.Address!, options.Port!.Value);
         listener.Start();
     }
-    public WebSocketListener(ushort port) : this(IPAddress.Any, port) { }
-    public WebSocketListener(ushort port, ServerSSLOptions options) : this(IPAddress.Any, port, options) { }
-    public WebSocketListener(IPEndPoint endPoint) : this(endPoint.Address, (ushort)endPoint.Port) { }
-    public WebSocketListener(IPEndPoint endPoint, ServerSSLOptions sSLOptions) : this(endPoint.Address, (ushort)endPoint.Port, sSLOptions) { }
 
     public WebSocket Accept()
     {
@@ -51,10 +45,10 @@ public class WebSocketListener : IDisposable
 
     private Stream GetStream(TcpClient client)
     {
-        if (SSLOptions.UseSSL)
+        if (options.UseSsl)
         {
             var sslStream = new SslStream(client.GetStream());
-            sslStream.AuthenticateAsServer(SSLOptions.Certificate!);
+            sslStream.AuthenticateAsServer(options.ServerCertificate!);
             return sslStream;
         }
         return client.GetStream();
