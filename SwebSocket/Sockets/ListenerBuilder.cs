@@ -22,7 +22,7 @@ public class ListenerBuilder
         return new SslListenerBuilder(Options);
     }
 
-    public WebSocketListener Build() => new WebSocketListener(Options);
+    public Listener Build() => new Listener(Options);
 }
 
 public class SslListenerBuilder : ListenerBuilder

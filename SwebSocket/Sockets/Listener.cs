@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace SwebSocket;
 
-public class WebSocketListener : IDisposable
+public class Listener : IDisposable
 {
     public IPAddress Address => options.Address!;
     public ushort Port => options.Port!.Value;
@@ -14,7 +14,7 @@ public class WebSocketListener : IDisposable
 
     private TcpListener listener;
 
-    internal WebSocketListener(ListenerOptions options)
+    internal Listener(ListenerOptions options)
     {
         this.options = options;
         listener = new TcpListener(options.Address!, options.Port!.Value);

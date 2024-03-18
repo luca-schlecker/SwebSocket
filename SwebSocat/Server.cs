@@ -4,7 +4,7 @@ namespace SwebSocat;
 
 class Server
 {
-    public static async Task Start(WebSocketListener pListener)
+    public static async Task Start(Listener pListener)
     {
         bool running = true;
         using var listener = pListener;
