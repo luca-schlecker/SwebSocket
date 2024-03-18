@@ -5,12 +5,12 @@ namespace SwebSocat;
 
 class Client
 {
-    public static async Task Start(Uri uri)
+    public static async Task Start(WebSocket pWs)
     {
         CancellationTokenSource cts = new();
         var token = cts.Token;
 
-        using var ws = WebSocket.Connect(uri);
+        using var ws = pWs;
         ws.OnConnected += delegate { Console.WriteLine("[Connected]"); };
         ws.OnClosed += delegate
         {
