@@ -1,6 +1,7 @@
 ﻿namespace SwebSocat;
 
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using CommandLine;
 using CommandLine.Text;
 
@@ -10,7 +11,6 @@ partial class Program
 
     public static async Task Main(string[] args)
     {
-        // await Server.Start(8080);
         result = Parser.Default.ParseArguments<Options>(args);
         await result.WithParsedAsync(HandleOptions);
     }
@@ -18,7 +18,22 @@ partial class Program
     private static async Task HandleOptions(Options o)
     {
         if (o.Uri == null && o.Port.HasValue)
-            await Server.Start(o.Port.Value);
+        {
+            X509Certificate? cert = null;
+            if (o.CertificatePath != null)
+            {
+                try
+                {
+                    cert = new X509Certificate(o.CertificatePath);
+                }
+                catch (ArgumentException e)
+                {
+                    Console.WriteLine("Failed to load certificate: " + e.Message);
+                    return;
+                }
+            }
+            await Server.Start(o.Port.Value, cert);
+        }
         else if (o.Uri != null && !o.Port.HasValue)
             await Client.Start(o.Uri);
         else

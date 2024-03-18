@@ -8,4 +8,6 @@ class Options
     public Uri? Uri { get; set; }
     [Option('l', "listen", HelpText = "Start a server", Required = false)]
     public ushort? Port { get; set; }
+    [Option("cert", HelpText = "The path to the certificate file", Required = false)]
+    public string? CertificatePath { get; set; }
 }

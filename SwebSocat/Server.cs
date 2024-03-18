@@ -1,15 +1,18 @@
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using SwebSocket;
 
 namespace SwebSocat;
 
 class Server
 {
-    public static async Task Start(ushort port)
+    public static async Task Start(ushort port, X509Certificate? cert = null)
     {
         bool running = true;
-        using var listener = new WebSocketListener(IPAddress.Any, port);
-        Console.WriteLine($"Listening on ws://0.0.0.0:{port}/");
+        var sslOptions = cert is null ? ServerSSLOptions.NoSSL() : ServerSSLOptions.WithCertificate(cert);
+        using var listener = new WebSocketListener(IPAddress.Any, port, sslOptions);
+        var protocol = cert is null ? "ws" : "wss";
+        Console.WriteLine($"Listening on {protocol}://0.0.0.0:{port}/");
 
         using var cts = new ResettableCancellationTokenSource();
 

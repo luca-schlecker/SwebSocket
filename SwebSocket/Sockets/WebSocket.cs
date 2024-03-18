@@ -1,3 +1,4 @@
+using System.Net.Security;
 using System.Net.Sockets;
 
 namespace SwebSocket;
@@ -10,12 +11,12 @@ public class WebSocket : Socket<Message>, IDisposable
     private CancellationTokenSource cancelHandshake = new();
     private TcpClient client;
 
-    internal WebSocket(TcpClient client, Handshake handshake, MaskingBehavior masking)
+    internal WebSocket(TcpClient client, Stream stream, Handshake handshake, MaskingBehavior masking)
     {
         this.client = client;
         Status = SocketStatus.Connecting;
         messageSplitter = new DefaultMessageSplitter();
-        Task.Run(() => InitiateHandshake(client.GetStream(), handshake, masking));
+        Task.Run(() => InitiateHandshake(stream, handshake, masking));
     }
 
     private async void InitiateHandshake(Stream stream, Handshake handshake, MaskingBehavior masking)
@@ -215,7 +216,19 @@ public class WebSocket : Socket<Message>, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public static WebSocket Connect(Uri uri)
+    public static WebSocket Connect(Uri uri) => Connect(
+        uri,
+        new WebSocketConnectionOptions()
+        {
+            SSL = new SSLConnectionOptions()
+            {
+                UseSSL = uri.Scheme == "wss",
+                ValidatedAuthority = uri.Host
+            }
+        }
+    );
+
+    public static WebSocket Connect(Uri uri, WebSocketConnectionOptions options)
     {
         if (uri.Scheme != "ws" && uri.Scheme != "wss")
             throw new ArgumentException("Invalid URI Scheme");
@@ -224,9 +237,21 @@ public class WebSocket : Socket<Message>, IDisposable
         client.Connect(uri.Host, uri.Port);
         return new WebSocket(
             client,
+            GetStream(client, options.SSL),
             new ClientHandshake(uri.Host, (ushort)uri.Port, uri.AbsolutePath),
             MaskingBehavior.MaskOutgoing
         );
+    }
+
+    private static Stream GetStream(TcpClient client, SSLConnectionOptions options)
+    {
+        if (options.UseSSL)
+        {
+            var sslStream = new SslStream(client.GetStream(), false);
+            sslStream.AuthenticateAsClient(options.ValidatedAuthority);
+            return sslStream;
+        }
+        return client.GetStream();
     }
 
     // public static WebSocket Connect(IPEndPoint remote, string path = "/")
