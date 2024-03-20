@@ -1,16 +1,19 @@
-namespace SwebSocket;
+using System;
 
-public class SocketNotConnectedException : Exception
+namespace SwebSocket
 {
-    public SocketNotConnectedException() : base("Socket is not connected") { }
-}
+    public class SocketNotConnectedException : Exception
+    {
+        public SocketNotConnectedException() : base("Socket is not connected") { }
+    }
 
-public class MessagesInterleavedException : Exception
-{
-    public MessagesInterleavedException() : base("Messages are interleaved") { }
-}
+    public class MessagesInterleavedException : Exception
+    {
+        public MessagesInterleavedException() : base("Messages are interleaved") { }
+    }
 
-public class UnexpectedFrameException : Exception
-{
-    public UnexpectedFrameException() : base("Received an unexpected frame") { }
+    public class UnexpectedFrameException : Exception
+    {
+        public UnexpectedFrameException() : base("Received an unexpected frame") { }
+    }
 }

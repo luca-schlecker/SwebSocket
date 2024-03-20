@@ -1,37 +1,38 @@
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
-namespace SwebSocket;
-
-public class ListenerBuilder
+namespace SwebSocket
 {
-    internal ListenerOptions Options { get; set; }
-
-    public ListenerBuilder() => Options = new ListenerOptions();
-
-    public ListenerBuilder On(IPAddress address, ushort port)
+    public class ListenerBuilder
     {
-        Options.Address = address;
-        Options.Port = port;
-        return this;
+        internal ListenerOptions Options { get; set; }
+
+        public ListenerBuilder() => Options = new ListenerOptions();
+
+        public ListenerBuilder On(IPAddress address, ushort port)
+        {
+            Options.Address = address;
+            Options.Port = port;
+            return this;
+        }
+
+        public SslListenerBuilder UseSsl(bool useSsl = true)
+        {
+            Options.UseSsl = useSsl;
+            return new SslListenerBuilder(Options);
+        }
+
+        public Listener Build() => new Listener(Options);
     }
 
-    public SslListenerBuilder UseSsl(bool useSsl = true)
+    public class SslListenerBuilder : ListenerBuilder
     {
-        Options.UseSsl = useSsl;
-        return new SslListenerBuilder(Options);
-    }
+        internal SslListenerBuilder(ListenerOptions options) => Options = options;
 
-    public Listener Build() => new Listener(Options);
-}
-
-public class SslListenerBuilder : ListenerBuilder
-{
-    internal SslListenerBuilder(ListenerOptions options) => Options = options;
-
-    public SslListenerBuilder WithServerCertificate(X509Certificate2? certificate)
-    {
-        Options.ServerCertificate = certificate;
-        return this;
+        public SslListenerBuilder WithServerCertificate(X509Certificate2? certificate)
+        {
+            Options.ServerCertificate = certificate;
+            return this;
+        }
     }
 }

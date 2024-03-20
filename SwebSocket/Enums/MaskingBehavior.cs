@@ -1,7 +1,8 @@
-namespace SwebSocket;
-
-internal enum MaskingBehavior
+namespace SwebSocket
 {
-    MaskOutgoing,
-    UnmaskIncoming,
+    internal enum MaskingBehavior
+    {
+        MaskOutgoing,
+        UnmaskIncoming,
+    }
 }

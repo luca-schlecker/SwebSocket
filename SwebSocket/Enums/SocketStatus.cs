@@ -1,9 +1,10 @@
-namespace SwebSocket;
-
-public enum SocketStatus
+namespace SwebSocket
 {
-    Connecting,
-    Connected,
-    Closing,
-    Closed,
+    public enum SocketStatus
+    {
+        Connecting,
+        Connected,
+        Closing,
+        Closed,
+    }
 }

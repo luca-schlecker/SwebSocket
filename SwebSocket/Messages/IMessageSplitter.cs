@@ -1,11 +1,14 @@
-namespace SwebSocket;
+using System.Collections.Generic;
 
-public interface IMessageSplitter
+namespace SwebSocket
 {
-    public IEnumerable<byte[]> Split(byte[] data);
-}
+    public interface IMessageSplitter
+    {
+        public IEnumerable<byte[]> Split(byte[] data);
+    }
 
-public class DefaultMessageSplitter : IMessageSplitter
-{
-    public IEnumerable<byte[]> Split(byte[] data) => [data];
+    public class DefaultMessageSplitter : IMessageSplitter
+    {
+        public IEnumerable<byte[]> Split(byte[] data) => new byte[][] { data };
+    }
 }

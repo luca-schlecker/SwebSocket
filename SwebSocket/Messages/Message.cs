@@ -1,41 +1,46 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
-namespace SwebSocket;
-
-public abstract class Message
+namespace SwebSocket
 {
-    public IEnumerable<Frame> GetFrames(IMessageSplitter splitter)
+    public abstract class Message
     {
-        var data = GetData();
-        var chunks = splitter.Split(data);
-        return chunks.Select((d, i) => MakeFrame(d) with
+        public IEnumerable<Frame> GetFrames(IMessageSplitter splitter)
         {
-            IsFinal = i == chunks.Count() - 1
-        });
-    }
-    protected abstract byte[] GetData();
-    protected abstract Frame MakeFrame(byte[] data);
+            var data = GetData();
+            var chunks = splitter.Split(data);
+            return chunks.Select((d, i) =>
+            {
+                var frame = MakeFrame(d);
+                frame.IsFinal = i == chunks.Count() - 1;
+                return frame;
+            });
+        }
+        protected abstract byte[] GetData();
+        protected abstract Frame MakeFrame(byte[] data);
 
-    public sealed class Text : Message
-    {
-        public string Data { get; }
-        public Text(string data) => Data = data;
+        public sealed class Text : Message
+        {
+            public string Data { get; }
+            public Text(string data) => Data = data;
 
-        protected override byte[] GetData()
-            => Encoding.UTF8.GetBytes(Data);
+            protected override byte[] GetData()
+                => Encoding.UTF8.GetBytes(Data);
 
-        protected override Frame MakeFrame(byte[] data)
-            => new Frame(FrameOpCode.Text, data);
-    }
+            protected override Frame MakeFrame(byte[] data)
+                => new Frame(FrameOpCode.Text, data);
+        }
 
-    public sealed class Binary : Message
-    {
-        public byte[] Data { get; }
-        public Binary(byte[] data) => Data = data;
+        public sealed class Binary : Message
+        {
+            public byte[] Data { get; }
+            public Binary(byte[] data) => Data = data;
 
-        protected override byte[] GetData() => Data;
+            protected override byte[] GetData() => Data;
 
-        protected override Frame MakeFrame(byte[] data)
-            => new Frame(FrameOpCode.Binary, data);
+            protected override Frame MakeFrame(byte[] data)
+                => new Frame(FrameOpCode.Binary, data);
+        }
     }
 }

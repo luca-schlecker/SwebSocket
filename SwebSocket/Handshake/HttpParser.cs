@@ -1,17 +1,20 @@
-namespace SwebSocket;
+using System;
 
-internal static class HttpParser
+namespace SwebSocket
 {
-    public static IHttpMachine.Model.HttpRequestResponse Parse(byte[] bytes)
+    internal static class HttpParser
     {
-        using var del = new HttpMachine.HttpParserDelegate();
-        using var parser = new HttpMachine.HttpCombinedParser(del);
+        public static IHttpMachine.Model.HttpRequestResponse Parse(byte[] bytes)
+        {
+            using var del = new HttpMachine.HttpParserDelegate();
+            using var parser = new HttpMachine.HttpCombinedParser(del);
 
-        if (bytes.Length != parser.Execute(bytes))
-            throw new Exception("Invalid HTTP Request");
+            if (bytes.Length != parser.Execute(bytes))
+                throw new Exception("Invalid HTTP Request");
 
-        parser.Execute(default(ArraySegment<byte>));
+            parser.Execute(default(ArraySegment<byte>));
 
-        return del.HttpRequestResponse;
+            return del.HttpRequestResponse;
+        }
     }
 }

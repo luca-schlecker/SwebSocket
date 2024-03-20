@@ -1,56 +1,60 @@
-using System.Net.Sockets;
+using System;
+using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace SwebSocket;
-
-internal class ClientHandshake : Handshake
+namespace SwebSocket
 {
-    private string host;
-    private ushort port;
-    private string path;
-
-    public ClientHandshake(string host, ushort port, string path)
+    internal class ClientHandshake : Handshake
     {
-        this.host = host;
-        this.port = port;
-        this.path = path;
-    }
+        private string host;
+        private ushort port;
+        private string path;
 
-    public override async Task StartHandshake(Stream stream, CancellationToken token = default)
-    {
-        var key = SecWebSocketKey.Random();
+        public ClientHandshake(string host, ushort port, string path)
+        {
+            this.host = host;
+            this.port = port;
+            this.path = path;
+        }
 
-        var upgradeRequest = UpgradeRequest(key, $"{host}:{port}", path);
-        await stream.WriteAsync(upgradeRequest, token);
-        var request = await stream.ReadUntilAsync("\r\n\r\n", token);
-        var httpResponse = HttpParser.Parse(request);
+        public override async Task StartHandshake(Stream stream, CancellationToken token = default)
+        {
+            var key = SecWebSocketKey.Random();
 
-        if (httpResponse.MajorVersion != 1 || httpResponse.MinorVersion != 1)
-            throw new Exception("Invalid Response HTTP Version");
-        if (httpResponse.StatusCode != 101)
-            throw new Exception("Invalid Response Status Code");
-        if (httpResponse.Headers.GetHttpHeader("Upgrade") != "websocket")
-            throw new Exception("Invalid Response Upgrade Header");
-        if (httpResponse.Headers.GetHttpHeader("Connection") != "Upgrade")
-            throw new Exception("Invalid Response Connection Header");
-        if (httpResponse.Headers.GetHttpHeader("Sec-WebSocket-Accept") != key.AcceptHeaderValue)
-            throw new Exception("Invalid Response Sec-WebSocket-Accept Header");
-        if (httpResponse.Headers.GetHttpHeader("Sec-WebSocket-Protocol") != null)
-            throw new Exception("Invalid Response Sec-WebSocket-Protocol");
-        if (httpResponse.Headers.GetHttpHeader("Sec-WebSocket-Extensions") != null)
-            throw new Exception("Invalid Response Sec-WebSocket-Extensions");
-    }
+            var upgradeRequest = UpgradeRequest(key, $"{host}:{port}", path);
+            await stream.WriteAsync(upgradeRequest, token);
+            var request = await stream.ReadUntilAsync("\r\n\r\n", token);
+            var httpResponse = HttpParser.Parse(request);
 
-    private static byte[] UpgradeRequest(SecWebSocketKey key, string hostname, string location)
-    {
-        return Encoding.ASCII.GetBytes(
-            $"GET {location} HTTP/1.1\r\n" +
-            $"Host: {hostname}\r\n" +
-            "Upgrade: websocket\r\n" +
-            "Connection: Upgrade\r\n" +
-            $"Sec-WebSocket-Key: {key.HeaderValue}\r\n" +
-            "Sec-WebSocket-Version: 13\r\n" +
-            "\r\n"
-        );
+            if (httpResponse.MajorVersion != 1 || httpResponse.MinorVersion != 1)
+                throw new Exception("Invalid Response HTTP Version");
+            if (httpResponse.StatusCode != 101)
+                throw new Exception("Invalid Response Status Code");
+            if (httpResponse.Headers.GetHttpHeader("Upgrade") != "websocket")
+                throw new Exception("Invalid Response Upgrade Header");
+            if (httpResponse.Headers.GetHttpHeader("Connection") != "Upgrade")
+                throw new Exception("Invalid Response Connection Header");
+            if (httpResponse.Headers.GetHttpHeader("Sec-WebSocket-Accept") != key.AcceptHeaderValue)
+                throw new Exception("Invalid Response Sec-WebSocket-Accept Header");
+            if (httpResponse.Headers.GetHttpHeader("Sec-WebSocket-Protocol") != null)
+                throw new Exception("Invalid Response Sec-WebSocket-Protocol");
+            if (httpResponse.Headers.GetHttpHeader("Sec-WebSocket-Extensions") != null)
+                throw new Exception("Invalid Response Sec-WebSocket-Extensions");
+        }
+
+        private static byte[] UpgradeRequest(SecWebSocketKey key, string hostname, string location)
+        {
+            return Encoding.ASCII.GetBytes(
+                $"GET {location} HTTP/1.1\r\n" +
+                $"Host: {hostname}\r\n" +
+                "Upgrade: websocket\r\n" +
+                "Connection: Upgrade\r\n" +
+                $"Sec-WebSocket-Key: {key.HeaderValue}\r\n" +
+                "Sec-WebSocket-Version: 13\r\n" +
+                "\r\n"
+            );
+        }
     }
 }
