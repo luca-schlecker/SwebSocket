@@ -23,6 +23,12 @@ namespace SwebSocket
             return this;
         }
 
+        /// <remarks>
+        /// Providing a 'wss' Uri will NOT automatically enable SSL. Use <see cref="UseSsl"/> instead;
+        /// </remarks>
+        public ConnectionBuilder To(string uri)
+            => To(new Uri(uri));
+
         public SslConnectionBuilder UseSsl(bool useSsl = true)
         {
             Options.UseSSL = useSsl;
