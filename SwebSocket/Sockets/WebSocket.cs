@@ -43,10 +43,12 @@ namespace SwebSocket
             }
             catch (OperationCanceledException)
             {
+                EndTestThenSetStatus();
                 client.Close();
             }
             catch
             {
+                EndTestThenSetStatus();
                 client.Close();
                 Status = SocketStatus.Closed;
                 EmitClosed();
@@ -76,6 +78,7 @@ namespace SwebSocket
                     EmitClosed();
                 }
             }
+            else EndTestThenSetStatus();
         }
 
         public override async Task CloseAsync()
@@ -101,6 +104,7 @@ namespace SwebSocket
                     EmitClosed();
                 }
             }
+            else EndTestThenSetStatus();
         }
 
         public override void Send(Message message)

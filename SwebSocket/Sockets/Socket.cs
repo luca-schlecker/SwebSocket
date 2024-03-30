@@ -71,5 +71,9 @@ namespace SwebSocket
             status = desired;
             Monitor.Exit(statusGuard);
         }
+        protected void EndTestThenSetStatus()
+        {
+            Monitor.Exit(statusGuard);
+        }
     }
 }

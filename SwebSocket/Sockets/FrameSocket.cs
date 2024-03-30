@@ -135,6 +135,7 @@ namespace SwebSocket
                 if (disposing)
                 {
                     Close();
+                    WaitForStatus(SocketStatus.Closed);
                     cts.Dispose();
                     sendLock.Dispose();
                 }
