@@ -1,5 +1,4 @@
 
-namespace SwebSocket
-{
-    public class WebSocketBuilder { }
-}
+namespace SwebSocket;
+
+public class WebSocketBuilder { }
