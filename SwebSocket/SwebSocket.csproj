@@ -6,4 +6,8 @@
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="HttpMachine.PCL" Version="4.0.3" />
+  </ItemGroup>
+
 </Project>
