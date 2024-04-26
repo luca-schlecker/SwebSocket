@@ -75,9 +75,11 @@ public class AsyncQueue<T> where T : class
     /// </summary>
     /// <exception cref="InvalidOperationException">The queue is closed.</exception>
     /// <exception cref="OperationCanceledException">The queue was closed while waiting for an item.</exception>
-    public T Dequeue()
+    public T Dequeue(CancellationToken token)
     {
-        cts.Token.ThrowIfCancellationRequested();
+        var linked = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token).Token;
+
+        linked.ThrowIfCancellationRequested();
         semaphore.Wait();
         if (queue.TryDequeue(out var item))
         {
@@ -87,6 +89,7 @@ public class AsyncQueue<T> where T : class
         else
         {
             var tcs = new TaskCompletionSource<T>();
+            using var registration = linked.Register(() => tcs.TrySetCanceled());
             waiters.Enqueue(tcs);
             semaphore.Release();
             return tcs.Task.Result;
