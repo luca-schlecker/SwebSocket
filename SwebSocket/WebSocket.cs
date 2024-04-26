@@ -1,5 +1,7 @@
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +36,7 @@ public class WebSocket
     /// <summary>
     /// The current state of the WebSocket.
     /// </summary>
-    public SocketState State { get; private set; }
+    public SocketState State => socket.State;
 
     /// <remarks>
     /// This event doesn't get raised on its own!
@@ -73,7 +75,11 @@ public class WebSocket
     /// This method is thread-safe.
     /// </remarks>
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
-    public void Send(Message message) { }
+    public void Send(Message message)
+    {
+        ThrowIfClosed();
+        outgoing.Enqueue(message);
+    }
 
     /// <summary>
     /// Queues a message to be sent to the peer.
@@ -82,7 +88,11 @@ public class WebSocket
     /// If the WebSocket is currently closing, the message will be discarded silently.
     /// </summary>
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
-    public async Task SendAsync(Message message) { }
+    public async Task SendAsync(Message message)
+    {
+        ThrowIfClosed();
+        await outgoing.EnqueueAsync(message);
+    }
 
     /// <summary>
     /// Return the next message from the peer.
@@ -91,7 +101,11 @@ public class WebSocket
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
     /// <exception cref="OperationCanceledException">The WebSocket is being closed and thus this function could never return.</exception>
     /// <exception cref="OperationCanceledException">The operation has been canceled using the given token.</exception>
-    public Message Receive(CancellationToken token = default) { return new TextMessage(""); }
+    public Message Receive(CancellationToken token = default)
+    {
+        ThrowIfClosed();
+        return incoming.Dequeue(token);
+    }
 
     /// <summary>
     /// Return the next message from the peer.
@@ -100,7 +114,11 @@ public class WebSocket
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
     /// <exception cref="OperationCanceledException">The WebSocket is being closed and thus this function could never return.</exception>
     /// <exception cref="OperationCanceledException">The operation has been canceled using the given token.</exception>
-    public async Task<Message> ReceiveAsync(CancellationToken token = default) => new TextMessage("");
+    public async Task<Message> ReceiveAsync(CancellationToken token = default)
+    {
+        ThrowIfClosed();
+        return await incoming.DequeueAsync(token);
+    }
 
     /// <summary>
     /// Try to receive a message from the peer.
@@ -108,7 +126,11 @@ public class WebSocket
     /// </summary>
     /// <returns>The next message from the peer, or <c>null</c> if there were no messages or the WebSocket is being closed.</returns>
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
-    public Message? TryReceive() => new TextMessage("");
+    public Message? TryReceive()
+    {
+        ThrowIfClosed();
+        return incoming.TryDequeue();
+    }
 
     /// <summary>
     /// Try to receive a message from the peer.
@@ -116,7 +138,11 @@ public class WebSocket
     /// </summary>
     /// <returns>The next message from the peer, or <c>null</c> if there were no messages or the WebSocket is being closed.</returns>
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
-    public async Task<Message?> TryReceiveAsync() => new TextMessage("");
+    public async Task<Message?> TryReceiveAsync()
+    {
+        ThrowIfClosed();
+        return await incoming.TryDequeueAsync();
+    }
 
     /// <summary>
     /// Close the WebSocket.
@@ -125,5 +151,85 @@ public class WebSocket
     /// <remarks>
     /// This method is idempotent. Calling it multiple times will have no effect.
     /// </remarks>
-    public void Close() { }
+    public void Close() => socket.Close();
+
+    private ConnectionFrameSocket socket;
+    private AsyncQueue<Message> incoming = new();
+    private AsyncQueue<Message> outgoing = new();
+
+    internal WebSocket(ConnectionFrameSocket socket)
+    {
+        this.socket = socket;
+        socket.OnClosed += (_, e) =>
+        {
+            incoming.Close();
+            outgoing.Close();
+            OnClosed?.Invoke(this, e);
+        };
+        socket.OnClosing += (_, e) => OnClosing?.Invoke(this, e);
+        Task.Run(StartLifecycle);
+    }
+
+    private async Task StartLifecycle()
+    {
+        try { await Task.WhenAny(HandleIncoming(), HandleOutgoing()); }
+        catch { }
+    }
+
+    private async Task HandleOutgoing()
+    {
+        while (true)
+        {
+            var message = await outgoing.DequeueAsync(default);
+            foreach (var frame in FramesFromMessage(message))
+                await socket.SendAsync(frame);
+        }
+    }
+
+    private async Task HandleIncoming()
+    {
+        var queue = new Queue<Frame>();
+        while (true)
+        {
+            var frame = await socket.ReceiveAsync(default);
+            queue.Enqueue(frame);
+            if (frame.IsFinal)
+            {
+                var message = MessageFromFrames(queue);
+                await incoming.EnqueueAsync(message);
+                queue.Clear();
+            }
+        }
+    }
+
+    private Frame[] FramesFromMessage(Message message)
+    {
+        return message switch
+        {
+            TextMessage text => new Frame[] { Frame.Text(text.Text) },
+            BinaryMessage binary => new Frame[] { Frame.Binary(binary.Data) },
+            _ => throw new InvalidOperationException("Unknown message type")
+        };
+    }
+
+    private Message MessageFromFrames(Queue<Frame> queue)
+    {
+        var first = queue.Peek();
+        var data = queue.SelectMany(frame => frame.Payload).ToArray();
+
+        Message message = first.OpCode switch
+        {
+            FrameOpCode.Text => new TextMessage(System.Text.Encoding.UTF8.GetString(data)),
+            FrameOpCode.Binary => new BinaryMessage(data),
+            _ => throw new InvalidOperationException("Unknown OpCode")
+        };
+
+        return message;
+    }
+
+    private void ThrowIfClosed()
+    {
+        if (State == SocketState.Closed)
+            throw new InvalidOperationException("The WebSocket is closed.");
+    }
 }
