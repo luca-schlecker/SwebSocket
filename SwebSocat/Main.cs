@@ -6,6 +6,8 @@ using SwebSocat;
 using SwebSocket;
 using static Crayon.Output;
 
+Utility.ReadLiner.Init();
+
 var result = Parser.Default.ParseArguments<Options>(args);
 await result.WithParsedAsync(async options =>
 {

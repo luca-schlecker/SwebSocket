@@ -20,18 +20,40 @@ static class Utility
         else throw new ArgumentException();
     }
 
-    public static Task<string?> ReadLineAsync(CancellationToken cancellation)
+    public static class ReadLiner
     {
-        return Task.Run(async () =>
-        {
-            while (!Console.KeyAvailable)
-            {
-                if (cancellation.IsCancellationRequested)
-                    return null;
+        private static TaskCompletionSource<string>? tcs = null;
 
-                await Task.Delay(100);
+        public static void Init() => Task.Run(ReadLineWorker);
+        public static async Task<string?> ReadLineAsync(CancellationToken token)
+        {
+            var tcs = new TaskCompletionSource<string>();
+            ReadLiner.tcs = tcs;
+            using var registration = token.Register(() => tcs.TrySetCanceled());
+            try
+            {
+                return await tcs.Task;
             }
-            return Console.ReadLine();
-        });
+            catch
+            {
+                ReadLiner.tcs = null;
+                return null;
+            }
+        }
+
+        private static async Task ReadLineWorker()
+        {
+            while (true)
+            {
+                while (!Console.KeyAvailable) await Task.Delay(100);
+                var line = Console.ReadLine();
+                if (line == null) return;
+                if (tcs is TaskCompletionSource<string> t)
+                {
+                    tcs = null;
+                    t.TrySetResult(line);
+                }
+            }
+        }
     }
 }

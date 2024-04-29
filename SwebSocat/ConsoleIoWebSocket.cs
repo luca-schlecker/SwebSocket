@@ -22,9 +22,8 @@ static class ConsoleIoWebSocket
 
         while (true)
         {
-            var line = await Utility.ReadLineAsync(cts.Token);
-            if (line == null)
-                break;
+            var line = await Utility.ReadLiner.ReadLineAsync(cts.Token);
+            if (line == null) break;
             ws.Send(new TextMessage(line));
         }
 
