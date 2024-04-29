@@ -91,6 +91,22 @@ public class WebSocket
     }
 
     /// <summary>
+    /// This convenience-method calls <see cref="Send(Message)"/> with a new <see cref="TextMessage"/> containing the provided string.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="Send(Message)"/> for more information.
+    /// </remarks>
+    public void Send(string text) => Send(new TextMessage(text));
+
+    /// <summary>
+    /// This convenience-method calls <see cref="Send(Message)"/> with a new <see cref="BinaryMessage"/> containing the provided data.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="Send(Message)"/> for more information.
+    /// </remarks>
+    public void Send(byte[] data) => Send(new BinaryMessage(data));
+
+    /// <summary>
     /// Queues a message to be sent to the peer.
     /// This Task will complete immediately.
     /// If the WebSocket is currently connecting, the message will be queued and sent once the WebSocket is connected.
@@ -102,6 +118,22 @@ public class WebSocket
         ThrowIfClosed();
         await outgoing.EnqueueAsync(message);
     }
+
+    /// <summary>
+    /// This convenience-method calls <see cref="SendAsync(Message)"/> with a new <see cref="TextMessage"/> containing the provided string.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="Send(Message)"/> for more information.
+    /// </remarks>
+    public Task SendAsync(string text) => SendAsync(new TextMessage(text));
+
+    /// <summary>
+    /// This convenience-method calls <see cref="SendAsync(Message)"/> with a new <see cref="BinaryMessage"/> containing the provided data.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="Send(Message)"/> for more information.
+    /// </remarks>
+    public Task SendAsync(byte[] data) => SendAsync(new BinaryMessage(data));
 
     /// <summary>
     /// Return the next message from the peer.
