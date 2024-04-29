@@ -65,7 +65,7 @@ public class Frame
         }
         var payload = new byte[realLength];
         read = await stream.ReadAsync(payload, token);
-        if (read == 0) throw new EndOfStreamException();
+        if (read == 0 && realLength != 0) throw new EndOfStreamException();
         return new Frame(isFinal, opCode, maskingKey, payload);
     }
 
