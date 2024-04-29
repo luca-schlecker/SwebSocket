@@ -5,6 +5,16 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>swebsocat</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RuntimeIdentifiers>win-x64;osx-arm64;linux-x64</RuntimeIdentifiers>
+
+    <PublishSelfContained>false</PublishSelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishRelease>true</PublishRelease>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>

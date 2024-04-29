@@ -4,10 +4,18 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>SwebSocket</Title>
+    <Description>An easy to use WebSocket library.</Description>
+    <Authors>Luca Schlecker</Authors>
+    <Copyright>Luca Schlecker</Copyright>
+    <RepositoryUrl>https://github.com/luca-schlecker/SwebSocket</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="HttpMachine.PCL" Version="4.0.3" />
+    <None Include="../README.md" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
 </Project>
