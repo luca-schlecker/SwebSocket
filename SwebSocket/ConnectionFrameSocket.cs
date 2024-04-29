@@ -10,6 +10,7 @@ internal class ConnectionFrameSocket
     public SocketState State { get; private set; }
     public event EventHandler? OnClosing;
     public event EventHandler? OnClosed;
+    public event EventHandler? OnConnected;
 
     private FrameSocket frameSocket;
     private Handshake handshake;
@@ -41,6 +42,8 @@ internal class ConnectionFrameSocket
         {
             await handshake.Perform(token);
             State = SocketState.Connected;
+
+            OnConnected?.Invoke(this, EventArgs.Empty);
 
             _ = Task.Run(PingWorker);
 

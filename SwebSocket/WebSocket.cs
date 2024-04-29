@@ -51,6 +51,15 @@ public class WebSocket
     public void EmitMessage(Message message) => OnMessage?.Invoke(this, message);
 
     /// <summary>
+    /// This event is raised when the WebSocket has successfully established a connection.
+    /// </summary>
+    public event EventHandler? OnConnected
+    {
+        add => socket.OnConnected += value;
+        remove => socket.OnConnected -= value;
+    }
+
+    /// <summary>
     /// This event is raised when the WebSocket is preparing to close.
     /// </summary>
     public event EventHandler? OnClosing;
