@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="crayon" Version="2.0.69" />
   </ItemGroup>
 
 </Project>

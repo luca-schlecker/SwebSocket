@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using CommandLine;
 using SwebSocat;
 using SwebSocket;
+using static Crayon.Output;
 
 var result = Parser.Default.ParseArguments<Options>(args);
 await result.WithParsedAsync(async options =>
@@ -24,7 +25,8 @@ await result.WithParsedAsync(async options =>
             ssl = SslOptions.ForServer(LoadPemCertificate(options.PemCertificatePath, options.PemKeyPath));
         }
 
-        Console.WriteLine($"Listening on {(ssl == SslOptions.NoSsl ? "ws" : "wss")}://{ip}:{port}/");
+        var listenAddr = Magenta().Underline($"{(ssl == SslOptions.NoSsl ? "ws" : "wss")}://{ip}:{port}/");
+        Console.WriteLine(Bold().Blue($"[Listening on {listenAddr}]"));
 
         var listener = new Listener(IPAddress.Parse(ip), (ushort)port);
         await Server.Start(listener);

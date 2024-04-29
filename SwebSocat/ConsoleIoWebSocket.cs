@@ -1,5 +1,6 @@
 
 using SwebSocket;
+using static Crayon.Output;
 
 namespace SwebSocat;
 
@@ -8,14 +9,14 @@ static class ConsoleIoWebSocket
     public static async Task Handle(WebSocket ws)
     {
         CancellationTokenSource cts = new();
-        ws.OnConnected += (_, _) => Console.WriteLine("[Connected]");
+        ws.OnConnected += (_, _) => Console.WriteLine(Bold().Green("[Connected]"));
         ws.OnMessage += (_, m) => m.Print();
         ws.OnClosing += (_, _) =>
         {
-            Console.WriteLine("[Closing]");
+            Console.WriteLine(Bold().Yellow("[Closing]"));
             cts.Cancel();
         };
-        ws.OnClosed += (_, _) => Console.WriteLine("[Closed]");
+        ws.OnClosed += (_, _) => Console.WriteLine(Bold().Red("[Closed]"));
 
         BackgroundMessagePoller.Poll(ws);
 
