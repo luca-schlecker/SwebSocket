@@ -27,17 +27,7 @@ internal class ConnectionFrameSocket
         Task.Run(StartLifecycle);
     }
 
-    public void Close()
-    {
-        Task.Run(async () =>
-        {
-            State = SocketState.Closing;
-            OnClosing?.Invoke(this, EventArgs.Empty);
-            await SendAsync(Frame.Close());
-            await Task.WhenAny(closeConfirmationReceived.Task, Task.Delay(1000));
-            closeCts.Cancel();
-        });
-    }
+    public void Close() => closeCts.Cancel();
     public void Send(Frame frame) => outgoing.Enqueue(frame);
     public Frame Receive(CancellationToken token) => incoming.Dequeue(token);
     public async Task SendAsync(Frame frame) => await outgoing.EnqueueAsync(frame);
@@ -46,6 +36,7 @@ internal class ConnectionFrameSocket
     private async Task StartLifecycle()
     {
         var token = closeCts.Token;
+
         try
         {
             await handshake.Perform(token);
@@ -55,28 +46,40 @@ internal class ConnectionFrameSocket
             var handleOutgoing = HandleOutgoing(token);
 
             await Task.WhenAny(handleIncoming, handleOutgoing);
-
             closeCts.Cancel();
             await Task.WhenAll(handleIncoming, handleOutgoing);
-
-            if (peerRequestedClose)
-                await frameSocket.SendAsync(Frame.Close());
         }
         catch { }
-        finally
+
+        var prevState = State;
+        State = SocketState.Closing;
+        OnClosing?.Invoke(this, EventArgs.Empty);
+
+        try
         {
-            State = SocketState.Closed;
-            frameSocket.Close();
-            incoming.Close();
-            outgoing.Close();
-            OnClosed?.Invoke(this, EventArgs.Empty);
+            if (peerRequestedClose)
+                await frameSocket.SendAsync(Frame.Close());
+            else if (prevState == SocketState.Connected)
+            {
+                await frameSocket.SendAsync(Frame.Close());
+                var pollCts = new CancellationTokenSource(1000);
+                await ReadCloseFrame(pollCts.Token);
+            }
         }
+        catch { }
+
+        State = SocketState.Closed;
+        frameSocket.Close();
+        incoming.Close();
+        outgoing.Close();
+        OnClosed?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task HandleOutgoing(CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        while (true)
         {
+            token.ThrowIfCancellationRequested();
             var frame = await outgoing.DequeueAsync(token);
             await frameSocket.SendAsync(frame);
         }
@@ -84,13 +87,25 @@ internal class ConnectionFrameSocket
 
     private async Task HandleIncoming(CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        while (true)
         {
+            token.ThrowIfCancellationRequested();
             var frame = await frameSocket.ReceiveAsync(token);
             if (IsUserFacingFrame(frame))
                 await incoming.EnqueueAsync(frame);
             else
                 await HandleInternalFrame(frame);
+        }
+    }
+
+    private async Task ReadCloseFrame(CancellationToken token)
+    {
+        while (true)
+        {
+            token.ThrowIfCancellationRequested();
+            var frame = await frameSocket.ReceiveAsync(token);
+            if (frame.OpCode == FrameOpCode.Close)
+                break;
         }
     }
 
@@ -101,7 +116,6 @@ internal class ConnectionFrameSocket
         else if (frame.OpCode == FrameOpCode.Close && State != SocketState.Closing)
         {
             peerRequestedClose = true;
-            OnClosing?.Invoke(this, EventArgs.Empty);
             closeCts.Cancel();
         }
         else if (frame.OpCode == FrameOpCode.Ping)
