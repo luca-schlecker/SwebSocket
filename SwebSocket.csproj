@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="HttpMachine.PCL" Version="4.0.3" />
-    <None Include="../README.md" Pack="true" PackagePath="/"/>
+    <None Include="README.md" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
 </Project>
