@@ -31,6 +31,7 @@ await result.WithParsedAsync(async options =>
         Console.WriteLine(Bold().Blue($"[Listening on {listenAddr}]"));
 
         var listener = new Listener(IPAddress.Parse(ip), (ushort)port);
+        listener.UseSsl(ssl);
         await Server.Start(listener);
     }
     else
