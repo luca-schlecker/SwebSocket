@@ -15,7 +15,7 @@ public class SslOptions
 
     internal SslOptions(SslStreamFactory sslStreamFactory) => SslStreamFactory = sslStreamFactory;
 
-    public static SslOptions NoSsl => new SslOptions(stream => stream);
+    public static readonly SslOptions NoSsl = new SslOptions(stream => stream);
 
     public static SslOptions ForServer(X509Certificate2 identity) => new SslOptions(stream =>
     {
