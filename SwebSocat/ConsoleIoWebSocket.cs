@@ -16,7 +16,6 @@ static class ConsoleIoWebSocket
             Console.WriteLine(Bold().Yellow("[Closing]"));
             cts.Cancel();
         };
-        ws.OnClosed += (_, _) => Console.WriteLine(Bold().Red("[Closed]"));
 
         BackgroundMessagePoller.Poll(ws);
 
@@ -31,5 +30,7 @@ static class ConsoleIoWebSocket
 
         while (ws.State != SocketState.Closed)
             await Task.Delay(50);
+
+        Console.WriteLine(Bold().Red("[Closed]"));
     }
 }
