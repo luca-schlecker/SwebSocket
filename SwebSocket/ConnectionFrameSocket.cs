@@ -42,6 +42,8 @@ internal class ConnectionFrameSocket
             await handshake.Perform(token);
             State = SocketState.Connected;
 
+            _ = Task.Run(PingWorker);
+
             var handleIncoming = HandleIncoming(token);
             var handleOutgoing = HandleOutgoing(token);
 
@@ -73,6 +75,15 @@ internal class ConnectionFrameSocket
         incoming.Close();
         outgoing.Close();
         OnClosed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task PingWorker()
+    {
+        while (State == SocketState.Connected)
+        {
+            await Task.Delay(5000);
+            await frameSocket.SendAsync(Frame.Ping());
+        }
     }
 
     private async Task HandleOutgoing(CancellationToken token)
