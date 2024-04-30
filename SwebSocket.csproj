@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
     <Title>SwebSocket</Title>
     <Description>An easy to use WebSocket library.</Description>
     <Authors>Luca Schlecker</Authors>
@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="HttpMachine.PCL" Version="4.0.3" />
-    <None Include="README.md" Pack="true" PackagePath="/"/>
+    <None Include="README.nuget.md" Pack="true" PackagePath="/"/>
     <None Include="icon.png" Pack="true" PackagePath="/"/>
   </ItemGroup>
 

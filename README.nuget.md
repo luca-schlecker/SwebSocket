@@ -1,13 +1,7 @@
 
-<p align="center">
-    <img src="https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png" />
-</p>
-<h1 align="center">SwebSocket</h1>
-<p align="center">
-    <img src="https://img.shields.io/nuget/dt/SwebSocket" alt="NuGet Downloads" />
-    <img src="https://img.shields.io/github/license/luca-schlecker/SwebSocket" alt="GitHub License" />
-    <img src="https://img.shields.io/nuget/v/SwebSocket" alt="NuGet Version" />
-</p>
+# ![SwebSocket Logo](https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png) SwebSocket
+
+![NuGet Downloads](https://img.shields.io/nuget/dt/SwebSocket) ![GitHub License](https://img.shields.io/github/license/luca-schlecker/SwebSocket) ![NuGet Version](https://img.shields.io/nuget/v/SwebSocket)
 
 A handwritten, easy to use WebSocket Library that aims to:
 - Follow [RFC6455](https://datatracker.ietf.org/doc/html/rfc6455)
@@ -18,7 +12,8 @@ A handwritten, easy to use WebSocket Library that aims to:
 
 ## Disclaimer
 
-> [!WARNING]
+> ⚠️ Warning ⚠️
+> 
 > This is a fun-project and may contain severe errors. You should probably not use this in production.
 
 ## Examples
@@ -68,7 +63,8 @@ while (true) {
 }
 ```
 
-> [!IMPORTANT]
+> 💬 Important 💬 
+> 
 > The `WebSocket.OnMessage` event will (by default) **not** be raised.
 > You can raise it manually by calling `WebSocket.EmitMessage(Message)` or use a Poller which will call it under the hood.
 
