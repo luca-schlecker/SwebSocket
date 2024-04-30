@@ -1,4 +1,6 @@
 
+![SwebSocket Logo](https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png)
+
 # SwebSocket
 
 A handwritten, easy to use WebSocket Library that aims to:
