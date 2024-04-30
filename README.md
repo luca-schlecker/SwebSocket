@@ -11,7 +11,7 @@
 
 A handwritten, easy to use WebSocket Library that aims to:
 - Follow [RFC6455](https://datatracker.ietf.org/doc/html/rfc6455)
-- Be ease to use
+- Be easy to use
 - Allow [Client](#client) and [Server](#server) use-cases
 - Integrate [Secure Connections](#secure-connection)
 - Be Portable (`netstandard2.1`)
@@ -112,7 +112,7 @@ while (true) {
 using SwebSocket;
 
 var listener = new Listener(IPAddress.Any, 3000)
-    .UseSsl(SslOptions.NoSsl) // No Ssl
+    .UseSsl(SslOptions.NoSsl)                // No Ssl
     .UseSsl(SslOptions.ForServer(identity)); // X509Certificate2 as Identity
 
 // ...
