@@ -1,5 +1,8 @@
 
-# SwebSocket
+<p align="center">
+    <img height="200px" src="https://github.com/luca-schlecker/SwebSocket/blob/main/icon.svg?raw=true" alt="Sublime's custom image"/>
+</p>
+<h1 align="center">SwebSocket</h1>
 
 A handwritten, easy to use WebSocket Library that aims to:
 - Follow [RFC6455](https://datatracker.ietf.org/doc/html/rfc6455)

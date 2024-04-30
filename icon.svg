@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with Vectornator (http://vectornator.io/) -->
+<svg height="100%" stroke-miterlimit="10" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 128 128" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<path d="M24 8L8 24L8 40L8 48L8 64L8 72L8 88L8 104L24 120L40 120L56 120L88 120L104 120L120 104L120 88L120 80L120 56L120 40L120 24L104 8L96 8L89.8125 8L88 8L72 8L48 8L40 8L24 8Z" id="Fill"/>
+</defs>
+<g id="Layer-2">
+<g opacity="1">
+<use fill="#dde3eb" fill-rule="nonzero" stroke="none" xlink:href="#Fill"/>
+<mask height="120" id="StrokeMask" maskUnits="userSpaceOnUse" width="120" x="4" y="4">
+<rect fill="#ffffff" height="120" stroke="none" width="120" x="4" y="4"/>
+<use fill="#000000" fill-rule="evenodd" stroke="none" xlink:href="#Fill"/>
+</mask>
+<use fill="none" mask="url(#StrokeMask)" stroke="#dde3eb" stroke-linecap="butt" stroke-linejoin="miter" stroke-width="8" xlink:href="#Fill"/>
+</g>
+<g opacity="1">
+<path d="M24 8L8 24L8 40L8 48L8 64L24 48L40 32L48 24L56 16L64 8L56 8L48 8L40 8L24 8Z" fill="#15467a" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M120 64L104 80L88 96L80 104L72 112L64 120L72 120L80 120L88 120L104 120L120 104L120 88L120 80L120 64Z" fill="#15467a" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M72 8L56 24L56 40L56 56L56 72L56 88L56 104L40 104L24 104L24 88L24 72L24 56L8 72L8 88L8 104L24 120L40 120L56 120L72 104L72 88L72 72L72 56L72 40L72 24L88 24L104 24L104 40L104 56L104 72L120 56L120 40L120 24L104 8L88 8L72 8Z" fill="#13161a" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M80 32L80 48L80 64L80 80L80 96L96 80L96 64L96 48L96 32L80 32Z" fill="#4c7097" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M48 32L32 48L32 64L32 80L32 96L48 96L48 80L48 64L48 48L48 32Z" fill="#4c7097" fill-rule="nonzero" opacity="1" stroke="none"/>
+</g>
+</g>
+</svg>
