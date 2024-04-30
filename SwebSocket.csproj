@@ -11,6 +11,7 @@
     <Copyright>Luca Schlecker</Copyright>
     <RepositoryUrl>https://github.com/luca-schlecker/SwebSocket</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
