@@ -49,8 +49,11 @@ public class Frame
             127 => new byte[8],
             _ => new byte[0],
         };
-        read = await stream.ReadAsync(payloadLength, token);
-        if (read == 0 && payloadLength.Length != 0) throw new EndOfStreamException();
+        if (payloadLength.Length != 0)
+        {
+            read = await stream.ReadAsync(payloadLength, token);
+            if (read == 0) throw new EndOfStreamException();
+        }
         var realLength = payloadLength.Length switch
         {
             2 => BitConverter.ToUInt16(payloadLength),
@@ -64,8 +67,11 @@ public class Frame
             if (read == 0) throw new EndOfStreamException();
         }
         var payload = new byte[realLength];
-        read = await stream.ReadAsync(payload, token);
-        if (read == 0 && realLength != 0) throw new EndOfStreamException();
+        if (realLength != 0)
+        {
+            read = await stream.ReadAsync(payload, token);
+            if (read == 0) throw new EndOfStreamException();
+        }
         return new Frame(isFinal, opCode, maskingKey, payload);
     }
 
