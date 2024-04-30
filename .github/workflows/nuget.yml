@@ -1,4 +1,5 @@
 name: Publish to NuGet
+run-name: Publish to NuGet
 
 on:
   push:
