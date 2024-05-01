@@ -1,7 +1,7 @@
 
-# ![SwebSocket Logo](https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png) SwebSocket
+# [![SwebSocket Logo](https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png)](https://github.com/luca-schlecker/SwebSocket) SwebSocket
 
-![NuGet Downloads](https://img.shields.io/nuget/dt/SwebSocket) ![GitHub License](https://img.shields.io/github/license/luca-schlecker/SwebSocket) ![NuGet Version](https://img.shields.io/nuget/v/SwebSocket)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/SwebSocket)](https://www.nuget.org/packages/SwebSocket) [![GitHub License](https://img.shields.io/github/license/luca-schlecker/SwebSocket)](https://github.com/luca-schlecker/SwebSocket/blob/main/LICENSE.md) [![NuGet Version](https://img.shields.io/nuget/v/SwebSocket)](https://www.nuget.org/packages/SwebSocket)
 
 A handwritten, easy to use WebSocket Library that aims to:
 - Follow [RFC6455](https://datatracker.ietf.org/doc/html/rfc6455)
@@ -15,6 +15,15 @@ A handwritten, easy to use WebSocket Library that aims to:
 > ⚠️ Warning ⚠️
 > 
 > This is a fun-project and may contain severe errors. You should probably not use this in production.
+
+## Installation
+
+This Library is on [NuGet](https://www.nuget.org/packages/SwebSocket) and can thus be installed in many ways, including but not limited to:
+- [Dotnet CLI](https://learn.microsoft.com/nuget/consume-packages/install-use-packages-dotnet-cli)
+- [Visual Studio NuGet Package Manager](https://learn.microsoft.com/nuget/consume-packages/install-use-packages-visual-studio)
+- [NuGet for Unity](https://github.com/GlitchEnzo/NuGetForUnity)
+
+There are more provided on the NuGet Page.
 
 ## Examples
 ### Client

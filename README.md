@@ -1,12 +1,12 @@
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png" />
+    <a href="https://github.com/luca-schlecker/SwebSocket"><img src="https://raw.githubusercontent.com/luca-schlecker/SwebSocket/main/icon.png" /></a>
 </p>
 <h1 align="center">SwebSocket</h1>
 <p align="center">
-    <img src="https://img.shields.io/nuget/dt/SwebSocket" alt="NuGet Downloads" />
-    <img src="https://img.shields.io/github/license/luca-schlecker/SwebSocket" alt="GitHub License" />
-    <img src="https://img.shields.io/nuget/v/SwebSocket" alt="NuGet Version" />
+    <a href="https://www.nuget.org/packages/SwebSocket"><img src="https://img.shields.io/nuget/dt/SwebSocket" alt="NuGet Downloads" /></a>
+    <a href="https://github.com/luca-schlecker/SwebSocket/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/luca-schlecker/SwebSocket" alt="GitHub License" /></a>
+    <a href="https://www.nuget.org/packages/SwebSocket"><img src="https://img.shields.io/nuget/v/SwebSocket" alt="NuGet Version" /></a>
 </p>
 
 A handwritten, easy to use WebSocket Library that aims to:
@@ -20,6 +20,15 @@ A handwritten, easy to use WebSocket Library that aims to:
 
 > [!WARNING]
 > This is a fun-project and may contain severe errors. You should probably not use this in production.
+
+## Installation
+
+This Library is on [NuGet](https://www.nuget.org/packages/SwebSocket) and can thus be installed in many ways, including but not limited to:
+- [Dotnet CLI](https://learn.microsoft.com/nuget/consume-packages/install-use-packages-dotnet-cli)
+- [Visual Studio NuGet Package Manager](https://learn.microsoft.com/nuget/consume-packages/install-use-packages-visual-studio)
+- [NuGet for Unity](https://github.com/GlitchEnzo/NuGetForUnity)
+
+There are more provided on the NuGet Page.
 
 ## Examples
 ### Client
