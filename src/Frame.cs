@@ -38,7 +38,7 @@ public class Frame
     public static async Task<Frame> FromStream(Stream stream, CancellationToken token)
     {
         var header = new byte[2];
-        var read = await stream.ReadAsync(header, token);
+        var read = await stream.ReadAsync(header, token).ConfigureAwait(false);
         if (read == 0) throw new EndOfStreamException();
         var isMasked = (header[1] & 0x80) == 0x80;
         var isFinal = (header[0] & 0x80) == 0x80;
@@ -51,7 +51,7 @@ public class Frame
         };
         if (payloadLength.Length != 0)
         {
-            read = await stream.ReadAsync(payloadLength, token);
+            read = await stream.ReadAsync(payloadLength, token).ConfigureAwait(false);
             if (read == 0) throw new EndOfStreamException();
         }
         var realLength = payloadLength.Length switch
@@ -63,13 +63,13 @@ public class Frame
         var maskingKey = isMasked ? new byte[4] : null;
         if (maskingKey != null)
         {
-            read = await stream.ReadAsync(maskingKey, token);
+            read = await stream.ReadAsync(maskingKey, token).ConfigureAwait(false);
             if (read == 0) throw new EndOfStreamException();
         }
         var payload = new byte[realLength];
         if (realLength != 0)
         {
-            read = await stream.ReadAsync(payload, token);
+            read = await stream.ReadAsync(payload, token).ConfigureAwait(false);
             if (read == 0) throw new EndOfStreamException();
         }
         return new Frame(isFinal, opCode, maskingKey, payload);

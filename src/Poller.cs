@@ -52,12 +52,25 @@ public static class BackgroundMessagePoller
 
         if (pollers.TryAdd(ws, cts))
         {
-            var poller = new BlockingMessagePoller(ws);
-            await poller.PollAsync(linked);
+            await PollContinuously(ws, linked).ConfigureAwait(false);
             if (pollers.TryRemove(ws, out cts))
                 cts.Dispose();
         }
     });
+
+    private static async Task PollContinuously(WebSocket ws, CancellationToken token)
+    {
+        try
+        {
+            while (ws.State == SocketState.Connected || ws.State == SocketState.Connecting)
+            {
+                token.ThrowIfCancellationRequested();
+                var msg = await ws.ReceiveAsync(token).ConfigureAwait(false);
+                ws.EmitMessage(msg);
+            }
+        }
+        catch { }
+    }
 
     public static bool TryStopPolling(WebSocket ws)
     {

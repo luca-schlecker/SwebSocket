@@ -24,12 +24,12 @@ internal class FrameSocket
     public async Task SendAsync(Frame frame)
     {
         if (isClient) frame.Mask();
-        await stream.WriteAsync(frame.ToArray());
+        await stream.WriteAsync(frame.ToArray()).ConfigureAwait(false);
     }
 
     public async Task<Frame> ReceiveAsync(CancellationToken token)
     {
-        var frame = await Frame.FromStream(stream, token);
+        var frame = await Frame.FromStream(stream, token).ConfigureAwait(false);
         return !isClient ? frame.Unmask() : frame;
     }
 }

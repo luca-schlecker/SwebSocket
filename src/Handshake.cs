@@ -24,7 +24,7 @@ internal abstract class Handshake
 
         while (canSafelyRead > 0)
         {
-            bytesRead += await stream.ReadAsync(buffer, bytesRead, canSafelyRead, token);
+            bytesRead += await stream.ReadAsync(buffer, bytesRead, canSafelyRead, token).ConfigureAwait(false);
             canSafelyRead = GetSafelyReadableBytes(buffer, bytesRead);
         }
 
@@ -81,8 +81,8 @@ internal class ClientHandshake : Handshake
     public override async Task Perform(CancellationToken token = default)
     {
         var upgradeRequest = UpgradeRequest(key, $"{host}:{port}", path);
-        await stream.WriteAsync(upgradeRequest, token);
-        var http = await ReadHttpMessage(token);
+        await stream.WriteAsync(upgradeRequest, token).ConfigureAwait(false);
+        var http = await ReadHttpMessage(token).ConfigureAwait(false);
 
         if (http!.MajorVersion != 1 || http.MinorVersion != 1)
             throw new Exception("Invalid Response HTTP Version");
@@ -120,7 +120,7 @@ internal class ServerHandshake : Handshake
 
     public override async Task Perform(CancellationToken token = default)
     {
-        var http = await ReadHttpMessage(token);
+        var http = await ReadHttpMessage(token).ConfigureAwait(false);
 
         string? secWebSocketKeyString;
         SecWebSocketKey? secWebSocketKey;
@@ -135,7 +135,7 @@ internal class ServerHandshake : Handshake
         ) throw new Exception("Invalid WebSocket handshake request");
 
         var response = UpgradeResponse(secWebSocketKey);
-        await stream.WriteAsync(response, token);
+        await stream.WriteAsync(response, token).ConfigureAwait(false);
     }
 
     private static byte[] UpgradeResponse(SecWebSocketKey key)

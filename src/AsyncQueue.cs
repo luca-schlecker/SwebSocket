@@ -61,7 +61,7 @@ public class AsyncQueue<T> where T : class
     public async Task EnqueueAsync(T item)
     {
         cts.Token.ThrowIfCancellationRequested();
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync().ConfigureAwait(false);
         if (waiters.TryDequeue(out var tcs))
             tcs.SetResult(item);
         else
@@ -96,7 +96,7 @@ public class AsyncQueue<T> where T : class
     public async Task EnqueueRangeAsync(IEnumerable<T> items)
     {
         cts.Token.ThrowIfCancellationRequested();
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync().ConfigureAwait(false);
         foreach (var item in items)
         {
             if (waiters.TryDequeue(out var tcs))
@@ -145,7 +145,7 @@ public class AsyncQueue<T> where T : class
         var linked = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token).Token;
 
         linked.ThrowIfCancellationRequested();
-        await semaphore.WaitAsync(linked);
+        await semaphore.WaitAsync(linked).ConfigureAwait(false);
         if (queue.TryDequeue(out var item))
         {
             semaphore.Release();
@@ -157,7 +157,7 @@ public class AsyncQueue<T> where T : class
             using var registration = linked.Register(() => tcs.TrySetCanceled());
             waiters.Enqueue(tcs);
             semaphore.Release();
-            return await tcs.Task;
+            return await tcs.Task.ConfigureAwait(false);
         }
     }
 
@@ -187,7 +187,7 @@ public class AsyncQueue<T> where T : class
         var linked = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token).Token;
 
         linked.ThrowIfCancellationRequested();
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync().ConfigureAwait(false);
         queue.TryDequeue(out var item);
         semaphore.Release();
         return item;

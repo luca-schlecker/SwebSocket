@@ -33,9 +33,9 @@ internal class ConnectionFrameSocket
     public void Send(Frame frame) => outgoing.Enqueue(frame);
     public void SendRange(IEnumerable<Frame> frames) => outgoing.EnqueueRange(frames);
     public Frame Receive(CancellationToken token) => incoming.Dequeue(token);
-    public async Task SendAsync(Frame frame) => await outgoing.EnqueueAsync(frame);
-    public async Task SendRangeAsync(IEnumerable<Frame> frames) => await outgoing.EnqueueRangeAsync(frames);
-    public async Task<Frame> ReceiveAsync(CancellationToken token) => await incoming.DequeueAsync(token);
+    public async Task SendAsync(Frame frame) => await outgoing.EnqueueAsync(frame).ConfigureAwait(false);
+    public async Task SendRangeAsync(IEnumerable<Frame> frames) => await outgoing.EnqueueRangeAsync(frames).ConfigureAwait(false);
+    public async Task<Frame> ReceiveAsync(CancellationToken token) => await incoming.DequeueAsync(token).ConfigureAwait(false);
 
     private async Task StartLifecycle()
     {
@@ -43,7 +43,7 @@ internal class ConnectionFrameSocket
 
         try
         {
-            await handshake.Perform(token);
+            await handshake.Perform(token).ConfigureAwait(false);
             State = SocketState.Connected;
 
             OnConnected?.Invoke(this, EventArgs.Empty);
@@ -53,9 +53,9 @@ internal class ConnectionFrameSocket
             var handleIncoming = HandleIncoming(token);
             var handleOutgoing = HandleOutgoing(token);
 
-            await Task.WhenAny(handleIncoming, handleOutgoing);
+            await Task.WhenAny(handleIncoming, handleOutgoing).ConfigureAwait(false);
             closeCts.Cancel();
-            await Task.WhenAll(handleIncoming, handleOutgoing);
+            await Task.WhenAll(handleIncoming, handleOutgoing).ConfigureAwait(false);
         }
         catch { }
 
@@ -66,12 +66,12 @@ internal class ConnectionFrameSocket
         try
         {
             if (peerRequestedClose)
-                await frameSocket.SendAsync(Frame.Close());
+                await frameSocket.SendAsync(Frame.Close()).ConfigureAwait(false);
             else if (prevState == SocketState.Connected)
             {
-                await frameSocket.SendAsync(Frame.Close());
+                await frameSocket.SendAsync(Frame.Close()).ConfigureAwait(false);
                 var pollCts = new CancellationTokenSource(1000);
-                await ReadCloseFrame(pollCts.Token);
+                await ReadCloseFrame(pollCts.Token).ConfigureAwait(false);
             }
         }
         catch { }
@@ -87,8 +87,8 @@ internal class ConnectionFrameSocket
     {
         while (State == SocketState.Connected)
         {
-            await Task.Delay(5000);
-            await frameSocket.SendAsync(Frame.Ping());
+            await Task.Delay(5000).ConfigureAwait(false);
+            await SendAsync(Frame.Ping()).ConfigureAwait(false);
         }
     }
 
@@ -99,14 +99,14 @@ internal class ConnectionFrameSocket
             while (true)
             {
                 token.ThrowIfCancellationRequested();
-                var frame = await outgoing.DequeueAsync(token);
-                await frameSocket.SendAsync(frame);
+                var frame = await outgoing.DequeueAsync(token).ConfigureAwait(false);
+                await frameSocket.SendAsync(frame).ConfigureAwait(false);
             }
         }
         catch { }
 
-        while (await outgoing.TryDequeueAsync() is { } frame)
-            await frameSocket.SendAsync(frame);
+        while (await outgoing.TryDequeueAsync().ConfigureAwait(false) is { } frame)
+            await frameSocket.SendAsync(frame).ConfigureAwait(false);
     }
 
     private async Task HandleIncoming(CancellationToken token)
@@ -114,11 +114,11 @@ internal class ConnectionFrameSocket
         while (true)
         {
             token.ThrowIfCancellationRequested();
-            var frame = await frameSocket.ReceiveAsync(token);
+            var frame = await frameSocket.ReceiveAsync(token).ConfigureAwait(false);
             if (IsUserFacingFrame(frame))
-                await incoming.EnqueueAsync(frame);
+                await incoming.EnqueueAsync(frame).ConfigureAwait(false);
             else
-                await HandleInternalFrame(frame);
+                await HandleInternalFrame(frame).ConfigureAwait(false);
         }
     }
 
@@ -127,7 +127,7 @@ internal class ConnectionFrameSocket
         while (true)
         {
             token.ThrowIfCancellationRequested();
-            var frame = await frameSocket.ReceiveAsync(token);
+            var frame = await frameSocket.ReceiveAsync(token).ConfigureAwait(false);
             if (frame.OpCode == FrameOpCode.Close)
                 break;
         }
@@ -143,7 +143,7 @@ internal class ConnectionFrameSocket
             closeCts.Cancel();
         }
         else if (frame.OpCode == FrameOpCode.Ping)
-            await frameSocket.SendAsync(Frame.Pong(frame));
+            await frameSocket.SendAsync(Frame.Pong(frame)).ConfigureAwait(false);
     }
 
     private static bool IsUserFacingFrame(Frame frame) => frame.OpCode switch

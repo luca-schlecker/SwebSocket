@@ -122,7 +122,7 @@ public class WebSocket
     public async Task SendAsync(Message message)
     {
         ThrowIfClosed();
-        await socket.SendRangeAsync(FramesFromMessage(message));
+        await socket.SendRangeAsync(FramesFromMessage(message)).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -164,7 +164,7 @@ public class WebSocket
     public async Task<Message> ReceiveAsync(CancellationToken token = default)
     {
         ThrowIfClosed();
-        return await incoming.DequeueAsync(token);
+        return await incoming.DequeueAsync(token).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -188,7 +188,7 @@ public class WebSocket
     public async Task<Message?> TryReceiveAsync()
     {
         ThrowIfClosed();
-        return await incoming.TryDequeueAsync();
+        return await incoming.TryDequeueAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -217,7 +217,7 @@ public class WebSocket
 
     private async Task StartLifecycle()
     {
-        try { await HandleIncoming(); }
+        try { await HandleIncoming().ConfigureAwait(false); }
         catch { }
     }
 
@@ -226,12 +226,12 @@ public class WebSocket
         var queue = new Queue<Frame>();
         while (true)
         {
-            var frame = await socket.ReceiveAsync(default);
+            var frame = await socket.ReceiveAsync(default).ConfigureAwait(false);
             queue.Enqueue(frame);
             if (frame.IsFinal)
             {
                 var message = MessageFromFrames(queue);
-                await incoming.EnqueueAsync(message);
+                await incoming.EnqueueAsync(message).ConfigureAwait(false);
                 queue.Clear();
             }
         }
