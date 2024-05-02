@@ -70,6 +70,44 @@ public class AsyncQueue<T> where T : class
     }
 
     /// <summary>
+    /// Enqueue multiple items.
+    /// This method will return immediately.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The queue is closed.</exception>
+    public void EnqueueRange(IEnumerable<T> items)
+    {
+        cts.Token.ThrowIfCancellationRequested();
+        semaphore.Wait();
+        foreach (var item in items)
+        {
+            if (waiters.TryDequeue(out var tcs))
+                tcs.SetResult(item);
+            else
+                queue.Enqueue(item);
+        }
+        semaphore.Release();
+    }
+
+    /// <summary>
+    /// Enqueue multiple items.
+    /// This Task will complete immediately.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The queue is closed.</exception>
+    public async Task EnqueueRangeAsync(IEnumerable<T> items)
+    {
+        cts.Token.ThrowIfCancellationRequested();
+        await semaphore.WaitAsync();
+        foreach (var item in items)
+        {
+            if (waiters.TryDequeue(out var tcs))
+                tcs.SetResult(item);
+            else
+                queue.Enqueue(item);
+        }
+        semaphore.Release();
+    }
+
+    /// <summary>
     /// Dequeue an item.
     /// This method will block until an item is available.
     /// </summary>

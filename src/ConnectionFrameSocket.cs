@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,8 +31,10 @@ internal class ConnectionFrameSocket
 
     public void Close() => closeCts.Cancel();
     public void Send(Frame frame) => outgoing.Enqueue(frame);
+    public void SendRange(IEnumerable<Frame> frames) => outgoing.EnqueueRange(frames);
     public Frame Receive(CancellationToken token) => incoming.Dequeue(token);
     public async Task SendAsync(Frame frame) => await outgoing.EnqueueAsync(frame);
+    public async Task SendRangeAsync(IEnumerable<Frame> frames) => await outgoing.EnqueueRangeAsync(frames);
     public async Task<Frame> ReceiveAsync(CancellationToken token) => await incoming.DequeueAsync(token);
 
     private async Task StartLifecycle()

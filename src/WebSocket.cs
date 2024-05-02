@@ -228,8 +228,7 @@ public class WebSocket
         while (true)
         {
             var message = await outgoing.DequeueAsync(default);
-            foreach (var frame in FramesFromMessage(message))
-                await socket.SendAsync(frame);
+            await socket.SendRangeAsync(FramesFromMessage(message));
         }
     }
 
