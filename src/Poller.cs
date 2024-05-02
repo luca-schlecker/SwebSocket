@@ -42,9 +42,9 @@ public class BlockingMessagePoller
 
 public static class BackgroundMessagePoller
 {
-    public static void Poll(WebSocket ws) => Task.Run(async () =>
+    public static void Poll(WebSocket ws, CancellationToken token = default) => Task.Run(async () =>
     {
         var poller = new BlockingMessagePoller(ws);
-        await poller.PollAsync();
+        await poller.PollAsync(token);
     });
 }
