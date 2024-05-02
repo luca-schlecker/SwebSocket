@@ -93,7 +93,7 @@ public class WebSocket
     public void Send(Message message)
     {
         ThrowIfClosed();
-        outgoing.Enqueue(message);
+        socket.SendRange(FramesFromMessage(message));
     }
 
     /// <summary>
@@ -122,7 +122,7 @@ public class WebSocket
     public async Task SendAsync(Message message)
     {
         ThrowIfClosed();
-        await outgoing.EnqueueAsync(message);
+        await socket.SendRangeAsync(FramesFromMessage(message));
     }
 
     /// <summary>
@@ -202,7 +202,6 @@ public class WebSocket
 
     private ConnectionFrameSocket socket;
     private AsyncQueue<Message> incoming = new();
-    private AsyncQueue<Message> outgoing = new();
 
     internal WebSocket(ConnectionFrameSocket socket)
     {
@@ -210,7 +209,6 @@ public class WebSocket
         socket.OnClosed += (_, e) =>
         {
             incoming.Close();
-            outgoing.Close();
             OnClosed?.Invoke(this, e);
         };
         socket.OnClosing += (_, e) => OnClosing?.Invoke(this, e);
@@ -219,17 +217,8 @@ public class WebSocket
 
     private async Task StartLifecycle()
     {
-        try { await Task.WhenAny(HandleIncoming(), HandleOutgoing()); }
+        try { await HandleIncoming(); }
         catch { }
-    }
-
-    private async Task HandleOutgoing()
-    {
-        while (true)
-        {
-            var message = await outgoing.DequeueAsync(default);
-            await socket.SendRangeAsync(FramesFromMessage(message));
-        }
     }
 
     private async Task HandleIncoming()
