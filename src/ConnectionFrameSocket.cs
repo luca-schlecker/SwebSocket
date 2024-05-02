@@ -91,12 +91,19 @@ internal class ConnectionFrameSocket
 
     private async Task HandleOutgoing(CancellationToken token)
     {
-        while (true)
+        try
         {
-            token.ThrowIfCancellationRequested();
-            var frame = await outgoing.DequeueAsync(token);
-            await frameSocket.SendAsync(frame);
+            while (true)
+            {
+                token.ThrowIfCancellationRequested();
+                var frame = await outgoing.DequeueAsync(token);
+                await frameSocket.SendAsync(frame);
+            }
         }
+        catch { }
+
+        while (await outgoing.TryDequeueAsync() is { } frame)
+            await frameSocket.SendAsync(frame);
     }
 
     private async Task HandleIncoming(CancellationToken token)
