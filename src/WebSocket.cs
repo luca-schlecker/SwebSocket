@@ -38,6 +38,12 @@ public class WebSocket
     /// </summary>
     public SocketState State => socket.State;
 
+    /// <summary>
+    /// The number of messages that are currently in the incoming queue.
+    /// These messages can be retreived without delay using the <see cref="Receive"/> and <see cref="ReceiveAsync"/> methods.
+    /// </summary>
+    public int Available => incoming.Count;
+
     /// <remarks>
     /// This event doesn't get raised on its own!
     /// Use a MessagePoller if you want to use this event.
