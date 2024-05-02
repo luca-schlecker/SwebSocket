@@ -146,4 +146,4 @@ var ws = WebSocket
 - [WebSocket-Sharp](https://github.com/sta/websocket-sharp)
 - [System.Net.WebSockets](https://learn.microsoft.com/en-us/dotnet/api/system.net.websockets)
 - [Fleck](https://github.com/statianzo/Fleck)
-- [WatsonWebsockte](https://github.com/jchristn/WatsonWebsocket)
+- [WatsonWebsocket](https://github.com/jchristn/WatsonWebsocket)
