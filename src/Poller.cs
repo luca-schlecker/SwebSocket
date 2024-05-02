@@ -1,4 +1,5 @@
 
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,9 +43,26 @@ public class BlockingMessagePoller
 
 public static class BackgroundMessagePoller
 {
+    private static ConcurrentDictionary<WebSocket, CancellationTokenSource> pollers = new();
+
     public static void Poll(WebSocket ws, CancellationToken token = default) => Task.Run(async () =>
     {
-        var poller = new BlockingMessagePoller(ws);
-        await poller.PollAsync(token);
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        var linked = cts.Token;
+
+        if (pollers.TryAdd(ws, cts))
+        {
+            var poller = new BlockingMessagePoller(ws);
+            await poller.PollAsync(linked);
+            if (pollers.TryRemove(ws, out cts))
+                cts.Dispose();
+        }
     });
+
+    public static bool TryStopPolling(WebSocket ws)
+    {
+        var removed = pollers.TryRemove(ws, out var cts);
+        if (removed) { cts.Cancel(); cts.Dispose(); }
+        return removed;
+    }
 }
