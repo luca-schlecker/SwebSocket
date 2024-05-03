@@ -21,6 +21,8 @@ public class AsyncQueue<T> where T : class
     /// </summary>
     public int Count => queue.Count;
 
+    public int BufferLimit { get; set; } = 1024;
+
     private CancellationTokenSource cts = new();
     private SemaphoreSlim semaphore = new(1);
     private Queue<T> queue = new();
@@ -39,12 +41,13 @@ public class AsyncQueue<T> where T : class
 
     /// <summary>
     /// Enqueue an item.
-    /// This method will return immediately.
+    /// This method will block as long as the queue buffer limit is reached, otherwise it will return immediately.
     /// </summary>
     /// <exception cref="InvalidOperationException">The queue is closed.</exception>
     public void Enqueue(T item)
     {
         cts.Token.ThrowIfCancellationRequested();
+        WaitWhileLimitReached(cts.Token);
         semaphore.Wait();
         if (waiters.TryDequeue(out var tcs))
             tcs.SetResult(item);
@@ -55,12 +58,13 @@ public class AsyncQueue<T> where T : class
 
     /// <summary>
     /// Enqueue an item.
-    /// This Task will complete immediately.
+    /// This Task will block as long as the queue buffer limit is reached, otherwise it will return immediately.
     /// </summary>
     /// <exception cref="InvalidOperationException">The queue is closed.</exception>
     public async Task EnqueueAsync(T item)
     {
         cts.Token.ThrowIfCancellationRequested();
+        await WaitWhileLimitReachedAsync(cts.Token);
         await semaphore.WaitAsync();
         if (waiters.TryDequeue(out var tcs))
             tcs.SetResult(item);
@@ -71,12 +75,13 @@ public class AsyncQueue<T> where T : class
 
     /// <summary>
     /// Enqueue multiple items.
-    /// This method will return immediately.
+    /// This method will block as long as the queue buffer limit is reached, otherwise it will return immediately.
     /// </summary>
     /// <exception cref="InvalidOperationException">The queue is closed.</exception>
     public void EnqueueRange(IEnumerable<T> items)
     {
         cts.Token.ThrowIfCancellationRequested();
+        WaitWhileLimitReached(cts.Token);
         semaphore.Wait();
         foreach (var item in items)
         {
@@ -90,12 +95,13 @@ public class AsyncQueue<T> where T : class
 
     /// <summary>
     /// Enqueue multiple items.
-    /// This Task will complete immediately.
+    /// This Task will block as long as the queue buffer limit is reached, otherwise it will return immediately.
     /// </summary>
     /// <exception cref="InvalidOperationException">The queue is closed.</exception>
     public async Task EnqueueRangeAsync(IEnumerable<T> items)
     {
         cts.Token.ThrowIfCancellationRequested();
+        await WaitWhileLimitReachedAsync(cts.Token);
         await semaphore.WaitAsync();
         foreach (var item in items)
         {
@@ -194,5 +200,23 @@ public class AsyncQueue<T> where T : class
         queue.TryDequeue(out var item);
         semaphore.Release();
         return item;
+    }
+
+    private void WaitWhileLimitReached(CancellationToken token)
+    {
+        while (Count >= BufferLimit)
+        {
+            Thread.Sleep(10);
+            token.ThrowIfCancellationRequested();
+        }
+    }
+
+    private async Task WaitWhileLimitReachedAsync(CancellationToken token)
+    {
+        while (Count >= BufferLimit)
+        {
+            await Task.Delay(10);
+            token.ThrowIfCancellationRequested();
+        }
     }
 }
