@@ -115,7 +115,8 @@ public class AsyncQueue<T> where T : class
     /// <exception cref="OperationCanceledException">The queue was closed while waiting for an item.</exception>
     public T Dequeue(CancellationToken token)
     {
-        var linked = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token).Token;
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token);
+        var linked = linkedCts.Token;
 
         linked.ThrowIfCancellationRequested();
         semaphore.Wait();
@@ -142,7 +143,8 @@ public class AsyncQueue<T> where T : class
     /// <exception cref="OperationCanceledException">The queue was closed while waiting for an item.</exception>
     public async Task<T> DequeueAsync(CancellationToken token)
     {
-        var linked = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token).Token;
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token);
+        var linked = linkedCts.Token;
 
         linked.ThrowIfCancellationRequested();
         await semaphore.WaitAsync(linked);
@@ -184,7 +186,8 @@ public class AsyncQueue<T> where T : class
     /// <exception cref="InvalidOperationException">The queue is closed.</exception>
     public async Task<T?> TryDequeueAsync(CancellationToken token = default)
     {
-        var linked = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token).Token;
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token, cts.Token);
+        var linked = linkedCts.Token;
 
         linked.ThrowIfCancellationRequested();
         await semaphore.WaitAsync();
