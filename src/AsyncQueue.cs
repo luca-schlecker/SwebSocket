@@ -19,7 +19,7 @@ public class AsyncQueue<T> where T : class
     /// <summary>
     /// The number of items available in the queue.
     /// </summary>
-    public int Count => 0;
+    public int Count => queue.Count;
 
     private CancellationTokenSource cts = new();
     private SemaphoreSlim semaphore = new(1);
