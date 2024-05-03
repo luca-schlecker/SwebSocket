@@ -14,7 +14,7 @@ public class AsyncQueue<T> where T : class
     /// <summary>
     /// Wether the queue is closed or not.
     /// </summary>
-    public bool IsClosed => true;
+    public bool IsClosed => cts.IsCancellationRequested;
 
     /// <summary>
     /// The number of items available in the queue.
