@@ -39,6 +39,12 @@ public class WebSocket
     public SocketState State => socket.State;
 
     /// <summary>
+    /// Wether to throw an exception or fail silently when acting on a closed WebSocket.
+    /// Defaults to <c>true</c>.
+    /// </summary>
+    public bool ThrowIfClosed { get; set; } = true;
+
+    /// <summary>
     /// The number of messages that are currently in the incoming queue.
     /// These messages can be retreived without delay using the <see cref="Receive"/> and <see cref="ReceiveAsync"/> methods.
     /// </summary>
@@ -84,15 +90,15 @@ public class WebSocket
     /// Queues a message to be sent to the peer.
     /// This method will return immediately.
     /// If the WebSocket is currently connecting, the message will be queued and sent once the WebSocket is connected.
-    /// If the WebSocket is currently closing, the message will be discarded silently.
+    /// If the WebSocket is currently closing or closed, the message will be discarded silently.
     /// </summary>
     /// <remarks>
     /// This method is thread-safe.
     /// </remarks>
-    /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
+    /// <exception cref="InvalidOperationException">The WebSocket is closed and <see cref="ThrowIfClosed"/> == <c>true</c>.</exception>
     public void Send(Message message)
     {
-        ThrowIfClosed();
+        if (HandleClosed()) return;
         socket.SendRange(FramesFromMessage(message));
     }
 
@@ -116,12 +122,12 @@ public class WebSocket
     /// Queues a message to be sent to the peer.
     /// This Task will complete immediately.
     /// If the WebSocket is currently connecting, the message will be queued and sent once the WebSocket is connected.
-    /// If the WebSocket is currently closing, the message will be discarded silently.
+    /// If the WebSocket is currently closing or closed, the message will be discarded silently.
     /// </summary>
-    /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
+    /// <exception cref="InvalidOperationException">The WebSocket is closed and <see cref="ThrowIfClosed"/> == <c>true</c>.</exception>
     public async Task SendAsync(Message message)
     {
-        ThrowIfClosed();
+        if (HandleClosed()) return;
         await socket.SendRangeAsync(FramesFromMessage(message));
     }
 
@@ -145,12 +151,15 @@ public class WebSocket
     /// Return the next message from the peer.
     /// This method will block until a message is received.
     /// </summary>
+    /// <remarks>
+    /// This method is not affected by <see cref="ThrowIfClosed"/> and will always throw if called in closed state.
+    /// </remarks>
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
     /// <exception cref="OperationCanceledException">The WebSocket is being closed and thus this function could never return.</exception>
     /// <exception cref="OperationCanceledException">The operation has been canceled using the given token.</exception>
     public Message Receive(CancellationToken token = default)
     {
-        ThrowIfClosed();
+        if (State == SocketState.Closed) throw new InvalidOperationException("The WebSocket is closed.");
         return incoming.Dequeue(token);
     }
 
@@ -158,12 +167,15 @@ public class WebSocket
     /// Return the next message from the peer.
     /// This Task will complete successfully once a message has been received.
     /// </summary>
+    /// <remarks>
+    /// This method is not affected by <see cref="ThrowIfClosed"/> and will always throw if called in closed state.
+    /// </remarks>
     /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
     /// <exception cref="OperationCanceledException">The WebSocket is being closed and thus this function could never return.</exception>
     /// <exception cref="OperationCanceledException">The operation has been canceled using the given token.</exception>
     public async Task<Message> ReceiveAsync(CancellationToken token = default)
     {
-        ThrowIfClosed();
+        if (State == SocketState.Closed) throw new InvalidOperationException("The WebSocket is closed.");
         return await incoming.DequeueAsync(token);
     }
 
@@ -171,11 +183,11 @@ public class WebSocket
     /// Try to receive a message from the peer.
     /// This method will return immediately.
     /// </summary>
-    /// <returns>The next message from the peer, or <c>null</c> if there were no messages or the WebSocket is being closed.</returns>
-    /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
+    /// <returns>The next message from the peer, or <c>null</c> if there were no messages or the WebSocket is closing or closed.</returns>
+    /// <exception cref="InvalidOperationException">The WebSocket is closed and <see cref="ThrowIfClosed"/> == <c>true</c>.</exception>
     public Message? TryReceive()
     {
-        ThrowIfClosed();
+        if (HandleClosed()) return null;
         return incoming.TryDequeue();
     }
 
@@ -183,11 +195,11 @@ public class WebSocket
     /// Try to receive a message from the peer.
     /// This Task will complete immediately.
     /// </summary>
-    /// <returns>The next message from the peer, or <c>null</c> if there were no messages or the WebSocket is being closed.</returns>
-    /// <exception cref="InvalidOperationException">The WebSocket is closed.</exception>
+    /// <returns>The next message from the peer, or <c>null</c> if there were no messages or the WebSocket is closing or closed.</returns>
+    /// <exception cref="InvalidOperationException">The WebSocket is closed and <see cref="ThrowIfClosed"/> == <c>true</c>.</exception>
     public async Task<Message?> TryReceiveAsync()
     {
-        ThrowIfClosed();
+        if (HandleClosed()) return null;
         return await incoming.TryDequeueAsync();
     }
 
@@ -262,9 +274,6 @@ public class WebSocket
         return message;
     }
 
-    private void ThrowIfClosed()
-    {
-        if (State == SocketState.Closed)
-            throw new InvalidOperationException("The WebSocket is closed.");
-    }
+    private bool HandleClosed() => State == SocketState.Closed &&
+        (ThrowIfClosed ? throw new InvalidOperationException("The WebSocket is closed.") : true);
 }
