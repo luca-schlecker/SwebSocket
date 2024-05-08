@@ -23,9 +23,9 @@ public class Frame
         if (Payload.Length < 126)
             header = new byte[] { 0, (byte)Payload.Length };
         else if (Payload.Length <= ushort.MaxValue)
-            header = new byte[] { 0, 126 }.Concat(BitConverter.GetBytes((ushort)Payload.Length)).ToArray();
+            header = new byte[] { 0, 126 }.Concat(FromUInt16((ushort)Payload.Length)).ToArray();
         else
-            header = new byte[] { 0, 127 }.Concat(BitConverter.GetBytes((ulong)Payload.LongLength)).ToArray();
+            header = new byte[] { 0, 127 }.Concat(FromUInt64((ulong)Payload.LongLength)).ToArray();
 
         header[0] |= IsFinal ? (byte)0x80 : (byte)0x00;
         header[0] |= (byte)OpCode;
@@ -50,8 +50,8 @@ public class Frame
         await stream.ReadExactly(payloadLength, token);
         var realLength = payloadLength.Length switch
         {
-            2 => BitConverter.ToUInt16(payloadLength),
-            8 => BitConverter.ToUInt64(payloadLength),
+            2 => ToUInt16(payloadLength),
+            8 => ToUInt64(payloadLength),
             _ => (ulong)(header[1] & 0x7F),
         };
         var maskingKey = isMasked ? await stream.ReadExactly(4, token) : null;
@@ -124,6 +124,38 @@ public class Frame
     }
     public static Frame Text(string message) => new Frame(FrameOpCode.Text, Encoding.UTF8.GetBytes(message));
     public static Frame Binary(byte[] data) => new Frame(FrameOpCode.Binary, data);
+    #endregion
+
+    #region UIntBitConversion
+    private static byte[] FromUInt16(ushort value)
+    {
+        var bytes = BitConverter.GetBytes(value);
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(bytes);
+        return bytes;
+    }
+
+    private static ushort ToUInt16(byte[] bytes)
+    {
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(bytes);
+        return BitConverter.ToUInt16(bytes);
+    }
+
+    private static byte[] FromUInt64(ulong value)
+    {
+        var bytes = BitConverter.GetBytes(value);
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(bytes);
+        return bytes;
+    }
+
+    private static ulong ToUInt64(byte[] bytes)
+    {
+        if (BitConverter.IsLittleEndian)
+            Array.Reverse(bytes);
+        return BitConverter.ToUInt64(bytes);
+    }
     #endregion
 }
 
