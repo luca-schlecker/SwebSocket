@@ -129,7 +129,7 @@ public class WebSocket
     /// This convenience-method calls <see cref="SendAsync(Message)"/> with a new <see cref="TextMessage"/> containing the provided string.
     /// </summary>
     /// <remarks>
-    /// See <see cref="Send(Message)"/> for more information.
+    /// See <see cref="SendAsync(Message)"/> for more information.
     /// </remarks>
     public Task SendAsync(string text) => SendAsync(new TextMessage(text));
 
@@ -137,7 +137,7 @@ public class WebSocket
     /// This convenience-method calls <see cref="SendAsync(Message)"/> with a new <see cref="BinaryMessage"/> containing the provided data.
     /// </summary>
     /// <remarks>
-    /// See <see cref="Send(Message)"/> for more information.
+    /// See <see cref="SendAsync(Message)"/> for more information.
     /// </remarks>
     public Task SendAsync(byte[] data) => SendAsync(new BinaryMessage(data));
 
