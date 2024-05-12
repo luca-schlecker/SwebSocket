@@ -14,8 +14,11 @@ public class Listener
     public Listener(IPAddress address, ushort port)
     {
         listener = new TcpListener(address, port);
-        listener.Start();
+        Start();
     }
+
+    public void Start() => listener.Start();
+    public void Stop() => listener.Stop();
 
     public Listener UseSsl(SslOptions sslOptions)
     {
