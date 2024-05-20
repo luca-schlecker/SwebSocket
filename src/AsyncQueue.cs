@@ -50,7 +50,7 @@ public class AsyncQueue<T> where T : class
         WaitWhileLimitReached(cts.Token);
         semaphore.Wait();
         if (waiters.TryDequeue(out var tcs))
-            tcs.SetResult(item);
+            tcs.TrySetResult(item);
         else
             queue.Enqueue(item);
         semaphore.Release();
@@ -67,7 +67,7 @@ public class AsyncQueue<T> where T : class
         await WaitWhileLimitReachedAsync(cts.Token);
         await semaphore.WaitAsync();
         if (waiters.TryDequeue(out var tcs))
-            tcs.SetResult(item);
+            tcs.TrySetResult(item);
         else
             queue.Enqueue(item);
         semaphore.Release();
@@ -86,7 +86,7 @@ public class AsyncQueue<T> where T : class
         foreach (var item in items)
         {
             if (waiters.TryDequeue(out var tcs))
-                tcs.SetResult(item);
+                tcs.TrySetResult(item);
             else
                 queue.Enqueue(item);
         }
@@ -106,7 +106,7 @@ public class AsyncQueue<T> where T : class
         foreach (var item in items)
         {
             if (waiters.TryDequeue(out var tcs))
-                tcs.SetResult(item);
+                tcs.TrySetResult(item);
             else
                 queue.Enqueue(item);
         }
